@@ -36,7 +36,7 @@
     "@faker-js/faker": "^9",
     "@types/node": "^20",
     "drizzle-kit": "^0.31",
-    "tsx": "^4.8",
+    "tsx": "^4.21.0",
     "vitest": "^3"
   }
 }

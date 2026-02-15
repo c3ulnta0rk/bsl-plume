@@ -1,5 +1,5 @@
-import { createBslAuthClient } from "@bsl-plume/auth/client";
+import { createBslAuthClient, type AuthClient } from "@bsl-plume/auth/client";
 
-export const authClient = createBslAuthClient(
+export const authClient: AuthClient = createBslAuthClient(
   process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
 );

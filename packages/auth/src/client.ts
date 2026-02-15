@@ -1,6 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 
-export function createBslAuthClient(baseURL: string) {
+export function createBslAuthClient(baseURL: string): ReturnType<typeof createAuthClient> {
   return createAuthClient({
     baseURL,
   });
