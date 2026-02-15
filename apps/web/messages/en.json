@@ -195,6 +195,13 @@
       "courtNumber": "Court {number}"
     }
   },
+  "error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try again",
+    "notFound": "Page not found",
+    "notFoundDescription": "The page you are looking for does not exist or has been moved."
+  },
   "player": {
     "profile": "Player Profile",
     "firstName": "First name",

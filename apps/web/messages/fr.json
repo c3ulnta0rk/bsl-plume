@@ -195,6 +195,13 @@
       "courtNumber": "Terrain {number}"
     }
   },
+  "error": {
+    "title": "Une erreur est survenue",
+    "description": "Quelque chose s'est mal passé. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "notFound": "Page non trouvée",
+    "notFoundDescription": "La page que vous cherchez n'existe pas ou a été déplacée."
+  },
   "player": {
     "profile": "Profil du joueur",
     "firstName": "Prénom",
