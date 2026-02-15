@@ -1,27 +1,22 @@
 {
-  "name": "bsl-app",
-  "version": "0.1.0",
+  "name": "bsl-plume",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "biome check",
-    "format": "biome format --write"
-  },
-  "dependencies": {
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "db:generate": "pnpm --filter @bsl-plume/db generate",
+    "db:migrate": "pnpm --filter @bsl-plume/db migrate",
+    "db:seed": "pnpm --filter @bsl-plume/db seed"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "tailwindcss": "^4",
+    "turbo": "^2",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "pnpm@8.4.0"
 }
