@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   Card,
@@ -7,8 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { db } from "@/lib/db";
-import { getClubBySlug, listTournamentsByClub } from "@bsl-plume/db/queries";
+import {
+  getClubBySlug,
+  listTournamentsByClub,
+  listCategoriesByTournament,
+  countRegistrationsByCategory,
+} from "@bsl-plume/db/queries";
 
 export default async function AdminDashboardPage({
   params,
@@ -19,68 +26,142 @@ export default async function AdminDashboardPage({
   setRequestLocale(locale);
 
   const club = await getClubBySlug(db, clubSlug);
-  const tournaments = club
-    ? await listTournamentsByClub(db, club.id)
-    : [];
+  if (!club) notFound();
+
+  const tournaments = await listTournamentsByClub(db, club.id);
+
+  const activeTournaments = tournaments.filter(
+    (t) => t.status === "in_progress" || t.status === "registration_open",
+  );
+
+  // Count total registrations across all active tournaments
+  let totalRegistrations = 0;
+  for (const tournament of activeTournaments) {
+    const categories = await listCategoriesByTournament(db, tournament.id);
+    for (const cat of categories) {
+      const [countResult] = await countRegistrationsByCategory(db, cat.id);
+      totalRegistrations += countResult?.count ?? 0;
+    }
+  }
 
   return (
     <AdminDashboard
+      locale={locale}
       clubSlug={clubSlug}
       tournamentCount={tournaments.length}
+      activeTournamentCount={activeTournaments.length}
+      totalRegistrations={totalRegistrations}
+      recentTournaments={tournaments.slice(0, 5).map((t) => ({
+        id: t.id,
+        name: t.name,
+        status: t.status,
+        startDate: t.startDate.toLocaleDateString(locale, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+      }))}
     />
   );
 }
 
 function AdminDashboard({
+  locale,
   clubSlug,
   tournamentCount,
+  activeTournamentCount,
+  totalRegistrations,
+  recentTournaments,
 }: {
+  locale: string;
   clubSlug: string;
   tournamentCount: number;
+  activeTournamentCount: number;
+  totalRegistrations: number;
+  recentTournaments: Array<{
+    id: string;
+    name: string;
+    status: string;
+    startDate: string;
+  }>;
 }) {
-  const t = useTranslations("admin");
-
-  const adminCards = [
-    {
-      title: t("tournaments"),
-      href: `/${clubSlug}/admin/tournois`,
-      count: tournamentCount,
-    },
-    {
-      title: t("players"),
-      href: `/${clubSlug}/admin/joueurs`,
-      count: 0,
-    },
-    {
-      title: t("courts"),
-      href: `/${clubSlug}/admin/terrains`,
-      count: 0,
-    },
-    {
-      title: t("scoring"),
-      href: `/${clubSlug}/admin/scores`,
-      count: 0,
-    },
-  ];
+  const t = useTranslations();
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold">{t("dashboard")}</h1>
+      <h1 className="text-3xl font-bold">{t("admin.dashboard")}</h1>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {adminCards.map((card) => (
-          <Link key={card.href} href={card.href}>
-            <Card className="transition-colors hover:bg-accent">
-              <CardHeader>
-                <CardTitle className="text-lg">{card.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-3xl font-bold">{card.count}</p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+      <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Link href={`/${locale}/${clubSlug}/admin/tournois`}>
+          <Card className="transition-colors hover:bg-accent">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {t("admin.tournaments")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{tournamentCount}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {activeTournamentCount} {t("tournament.status.in_progress").toLowerCase()}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {t("admin.tournamentDetail.totalRegistrations")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{totalRegistrations}</p>
+          </CardContent>
+        </Card>
+
+        <Link href={`/${locale}/${clubSlug}/admin/tournois/nouveau`}>
+          <Card className="transition-colors hover:bg-accent">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {t("tournament.create.title")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">+</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
+
+      {recentTournaments.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-4 text-xl font-semibold">
+            {t("admin.tournaments")}
+          </h2>
+          <div className="space-y-3">
+            {recentTournaments.map((tournament) => (
+              <Link
+                key={tournament.id}
+                href={`/${locale}/${clubSlug}/admin/tournois/${tournament.id}`}
+              >
+                <Card className="transition-colors hover:bg-accent">
+                  <CardContent className="flex items-center justify-between p-4">
+                    <div>
+                      <p className="font-medium">{tournament.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {tournament.startDate}
+                      </p>
+                    </div>
+                    <Badge variant="secondary">
+                      {t(`tournament.status.${tournament.status}`)}
+                    </Badge>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
