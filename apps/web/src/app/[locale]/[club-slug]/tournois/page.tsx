@@ -9,34 +9,66 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
+import { db } from "@/lib/db";
+import {
+  getClubBySlug,
+  listPublicTournaments,
+  listCategoriesByTournament,
+} from "@bsl-plume/db/queries";
 
 export default async function TournamentsPage({
   params,
 }: {
   params: Promise<{ locale: string; "club-slug": string }>;
 }) {
-  const { locale } = await params;
+  const { locale, "club-slug": clubSlug } = await params;
   setRequestLocale(locale);
 
-  // TODO: Fetch tournaments from DB
-  return <TournamentsContent />;
+  const club = await getClubBySlug(db, clubSlug);
+  const rawTournaments = club
+    ? await listPublicTournaments(db, club.id)
+    : [];
+
+  const tournaments = await Promise.all(
+    rawTournaments.map(async (t) => {
+      const categories = await listCategoriesByTournament(db, t.id);
+      return {
+        id: t.id,
+        name: t.name,
+        startDate: t.startDate.toLocaleDateString(locale, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        endDate: t.endDate.toLocaleDateString(locale, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        status: t.status,
+        location: t.location ?? "",
+        categories: categories.map((c) => c.type),
+      };
+    }),
+  );
+
+  return <TournamentsContent tournaments={tournaments} />;
 }
 
-function TournamentsContent() {
+function TournamentsContent({
+  tournaments,
+}: {
+  tournaments: Array<{
+    id: string;
+    name: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+    location: string;
+    categories: string[];
+  }>;
+}) {
   const t = useTranslations();
-
-  // Placeholder data until DB is connected
-  const tournaments = [
-    {
-      id: "1",
-      name: "Open de Rimouski 2026",
-      startDate: "2026-04-15",
-      endDate: "2026-04-16",
-      status: "registration_open" as const,
-      location: "Centre sportif de Rimouski",
-      categories: ["SH", "SD", "DH", "DD", "DX"],
-    },
-  ];
 
   return (
     <div className="container mx-auto px-4 py-8">

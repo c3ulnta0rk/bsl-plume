@@ -9,6 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { db } from "@/lib/db";
+import { getClubBySlug, listTournamentsByClub } from "@bsl-plume/db/queries";
 
 export default async function AdminTournamentsPage({
   params,
@@ -18,20 +20,41 @@ export default async function AdminTournamentsPage({
   const { locale, "club-slug": clubSlug } = await params;
   setRequestLocale(locale);
 
-  // TODO: Fetch tournaments from DB
-  return <AdminTournaments clubSlug={clubSlug} />;
+  const club = await getClubBySlug(db, clubSlug);
+  const tournaments = club
+    ? await listTournamentsByClub(db, club.id)
+    : [];
+
+  return (
+    <AdminTournaments
+      clubSlug={clubSlug}
+      tournaments={tournaments.map((t) => ({
+        id: t.id,
+        name: t.name,
+        status: t.status,
+        startDate: t.startDate.toLocaleDateString(locale, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+      }))}
+    />
+  );
 }
 
-function AdminTournaments({ clubSlug }: { clubSlug: string }) {
-  const t = useTranslations();
-
-  // Placeholder data
-  const tournaments: Array<{
+function AdminTournaments({
+  clubSlug,
+  tournaments,
+}: {
+  clubSlug: string;
+  tournaments: Array<{
     id: string;
     name: string;
     status: string;
     startDate: string;
-  }> = [];
+  }>;
+}) {
+  const t = useTranslations();
 
   return (
     <div className="container mx-auto px-4 py-8">

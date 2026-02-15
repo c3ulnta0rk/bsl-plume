@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./src/client.ts"
     }
   },
   "scripts": {
@@ -14,7 +18,7 @@
   },
   "dependencies": {
     "@bsl-plume/db": "workspace:*",
-    "better-auth": "^1"
+    "better-auth": "^1.4"
   },
   "devDependencies": {
     "@bsl-plume/config": "workspace:*"

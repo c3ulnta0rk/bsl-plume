@@ -7,6 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { db } from "@/lib/db";
+import { getClubBySlug, listTournamentsByClub } from "@bsl-plume/db/queries";
 
 export default async function AdminDashboardPage({
   params,
@@ -16,17 +18,33 @@ export default async function AdminDashboardPage({
   const { locale, "club-slug": clubSlug } = await params;
   setRequestLocale(locale);
 
-  return <AdminDashboard clubSlug={clubSlug} />;
+  const club = await getClubBySlug(db, clubSlug);
+  const tournaments = club
+    ? await listTournamentsByClub(db, club.id)
+    : [];
+
+  return (
+    <AdminDashboard
+      clubSlug={clubSlug}
+      tournamentCount={tournaments.length}
+    />
+  );
 }
 
-function AdminDashboard({ clubSlug }: { clubSlug: string }) {
+function AdminDashboard({
+  clubSlug,
+  tournamentCount,
+}: {
+  clubSlug: string;
+  tournamentCount: number;
+}) {
   const t = useTranslations("admin");
 
   const adminCards = [
     {
       title: t("tournaments"),
       href: `/${clubSlug}/admin/tournois`,
-      count: 0,
+      count: tournamentCount,
     },
     {
       title: t("players"),

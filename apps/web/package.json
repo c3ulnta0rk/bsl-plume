@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@bsl-plume/auth": "workspace:*",
+    "better-auth": "^1.4",
     "@bsl-plume/db": "workspace:*",
     "@bsl-plume/realtime": "workspace:*",
     "@bsl-plume/tournament-engine": "workspace:*",

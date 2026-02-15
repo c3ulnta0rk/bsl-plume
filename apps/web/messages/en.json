@@ -122,6 +122,36 @@
     "semifinals": "Semi-finals",
     "quarterfinals": "Quarter-finals"
   },
+  "auth": {
+    "signIn": {
+      "title": "Sign In",
+      "description": "Sign in to your BSL Plume account",
+      "submit": "Sign in",
+      "loading": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create an account"
+    },
+    "signUp": {
+      "title": "Create Account",
+      "description": "Sign up to manage your tournaments",
+      "submit": "Create account",
+      "loading": "Creating...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "fields": {
+      "name": "Full name",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid credentials",
+      "passwordMismatch": "Passwords do not match",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "signUpFailed": "Failed to create account"
+    }
+  },
   "admin": {
     "dashboard": "Dashboard",
     "tournaments": "Tournament Management",

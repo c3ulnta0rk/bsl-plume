@@ -122,6 +122,36 @@
     "semifinals": "Demi-finales",
     "quarterfinals": "Quarts de finale"
   },
+  "auth": {
+    "signIn": {
+      "title": "Connexion",
+      "description": "Connectez-vous à votre compte BSL Plume",
+      "submit": "Se connecter",
+      "loading": "Connexion...",
+      "noAccount": "Pas encore de compte ?",
+      "createAccount": "Créer un compte"
+    },
+    "signUp": {
+      "title": "Créer un compte",
+      "description": "Inscrivez-vous pour gérer vos tournois",
+      "submit": "Créer mon compte",
+      "loading": "Création...",
+      "hasAccount": "Déjà un compte ?",
+      "signIn": "Se connecter"
+    },
+    "fields": {
+      "name": "Nom complet",
+      "email": "Adresse courriel",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe"
+    },
+    "errors": {
+      "invalidCredentials": "Identifiants invalides",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+      "signUpFailed": "Erreur lors de la création du compte"
+    }
+  },
   "admin": {
     "dashboard": "Tableau de bord",
     "tournaments": "Gestion des tournois",

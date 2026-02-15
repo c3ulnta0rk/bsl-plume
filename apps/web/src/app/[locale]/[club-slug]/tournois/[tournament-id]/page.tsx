@@ -9,6 +9,18 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { db } from "@/lib/db";
+import {
+  getTournamentById,
+  listCategoriesByTournament,
+  countRegistrationsByCategory,
+  listPoolsByCategory,
+  listPoolEntries,
+  getBracketByCategory,
+  listMatchesByBracket,
+} from "@bsl-plume/db/queries";
+import { getPlayerById } from "@bsl-plume/db/queries";
+import { notFound } from "next/navigation";
 
 export default async function TournamentDetailPage({
   params,
@@ -19,31 +31,228 @@ export default async function TournamentDetailPage({
     "tournament-id": string;
   }>;
 }) {
-  const { locale } = await params;
+  const { locale, "tournament-id": tournamentId } = await params;
   setRequestLocale(locale);
 
-  // TODO: Fetch tournament from DB
-  return <TournamentDetail />;
+  const tournament = await getTournamentById(db, tournamentId);
+  if (!tournament) {
+    notFound();
+  }
+
+  const categories = await listCategoriesByTournament(db, tournament.id);
+
+  const categoriesWithCount = await Promise.all(
+    categories.map(async (cat) => {
+      const [countResult] = await countRegistrationsByCategory(db, cat.id);
+      return {
+        id: cat.id,
+        type: cat.type,
+        maxPlayers: cat.maxPlayers,
+        registeredCount: countResult?.count ?? 0,
+      };
+    }),
+  );
+
+  // Load pools for first category that has them
+  const poolsData = await Promise.all(
+    categories.map(async (cat) => {
+      const pools = await listPoolsByCategory(db, cat.id);
+      return Promise.all(
+        pools.map(async (pool) => {
+          const entries = await listPoolEntries(db, pool.id);
+
+          const entriesWithNames = await Promise.all(
+            entries.map(async (entry) => {
+              const player = await getPlayerById(db, entry.playerId);
+              return {
+                name: player
+                  ? `${player.lastName}, ${player.firstName.charAt(0)}.`
+                  : entry.playerId.slice(0, 8),
+                wins: entry.wins,
+                losses: entry.losses,
+                pf: entry.pointsFor,
+                pa: entry.pointsAgainst,
+                diff: entry.pointsFor - entry.pointsAgainst,
+              };
+            }),
+          );
+
+          return {
+            name: pool.name,
+            entries: entriesWithNames,
+          };
+        }),
+      );
+    }),
+  );
+
+  const allPools = poolsData.flat();
+
+  // Load bracket data
+  const bracketData = await Promise.all(
+    categories.map(async (cat) => {
+      const bracket = await getBracketByCategory(db, cat.id);
+      if (!bracket) return null;
+      const matches = await listMatchesByBracket(db, bracket.id);
+      return { bracket, matches };
+    }),
+  );
+  const activeBracket = bracketData.find((b) => b !== null);
+
+  // Build bracket rounds for display
+  const bracketRounds: Array<{
+    name: string;
+    matches: Array<{
+      p1: string;
+      p2: string;
+      score: string | null;
+      winner: number | null;
+    }>;
+  }> = [];
+
+  if (activeBracket) {
+    const roundGroups = new Map<number, typeof activeBracket.matches>();
+    for (const match of activeBracket.matches) {
+      const existing = roundGroups.get(match.round) ?? [];
+      existing.push(match);
+      roundGroups.set(match.round, existing);
+    }
+
+    const sortedRounds = [...roundGroups.entries()].sort(
+      ([a], [b]) => a - b,
+    );
+
+    for (const [roundNum, roundMatches] of sortedRounds) {
+      const roundName =
+        roundMatches.length === 1
+          ? "Finale"
+          : roundMatches.length === 2
+            ? "Demi-finales"
+            : roundMatches.length === 4
+              ? "Quarts de finale"
+              : `Tour ${roundNum}`;
+
+      bracketRounds.push({
+        name: roundName,
+        matches: await Promise.all(
+          roundMatches.map(async (m) => {
+            const p1 = m.participant1Id
+              ? await getPlayerById(db, m.participant1Id)
+              : null;
+            const p2 = m.participant2Id
+              ? await getPlayerById(db, m.participant2Id)
+              : null;
+
+            const score = m.status === "completed" && m.scoreSet1P1 !== null
+              ? formatScore(m)
+              : null;
+
+            return {
+              p1: p1
+                ? `${p1.lastName}, ${p1.firstName.charAt(0)}.`
+                : "TBD",
+              p2: p2
+                ? `${p2.lastName}, ${p2.firstName.charAt(0)}.`
+                : "TBD",
+              score,
+              winner:
+                m.winnerId === m.participant1Id
+                  ? 1
+                  : m.winnerId === m.participant2Id
+                    ? 2
+                    : null,
+            };
+          }),
+        ),
+      });
+    }
+  }
+
+  return (
+    <TournamentDetail
+      tournament={{
+        name: tournament.name,
+        status: tournament.status,
+        location: tournament.location ?? "",
+        startDate: tournament.startDate.toLocaleDateString(locale, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        endDate: tournament.endDate.toLocaleDateString(locale, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        categories: categoriesWithCount,
+      }}
+      pools={allPools}
+      bracketRounds={bracketRounds}
+    />
+  );
 }
 
-function TournamentDetail() {
-  const t = useTranslations();
+function formatScore(m: {
+  scoreSet1P1: number | null;
+  scoreSet1P2: number | null;
+  scoreSet2P1: number | null;
+  scoreSet2P2: number | null;
+  scoreSet3P1: number | null;
+  scoreSet3P2: number | null;
+}): string {
+  const sets: string[] = [];
+  if (m.scoreSet1P1 !== null && m.scoreSet1P2 !== null) {
+    sets.push(`${m.scoreSet1P1}-${m.scoreSet1P2}`);
+  }
+  if (m.scoreSet2P1 !== null && m.scoreSet2P2 !== null) {
+    sets.push(`${m.scoreSet2P1}-${m.scoreSet2P2}`);
+  }
+  if (m.scoreSet3P1 !== null && m.scoreSet3P2 !== null) {
+    sets.push(`${m.scoreSet3P1}-${m.scoreSet3P2}`);
+  }
+  return sets.join(", ");
+}
 
-  // Placeholder data
-  const tournament = {
-    name: "Open de Rimouski 2026",
-    status: "registration_open",
-    location: "Centre sportif de Rimouski",
-    startDate: "15 avril 2026",
-    endDate: "16 avril 2026",
-    categories: [
-      { type: "SH", registeredCount: 12, maxPlayers: 32 },
-      { type: "SD", registeredCount: 8, maxPlayers: 32 },
-      { type: "DH", registeredCount: 6, maxPlayers: 16 },
-      { type: "DD", registeredCount: 4, maxPlayers: 16 },
-      { type: "DX", registeredCount: 10, maxPlayers: 16 },
-    ],
+function TournamentDetail({
+  tournament,
+  pools,
+  bracketRounds,
+}: {
+  tournament: {
+    name: string;
+    status: string;
+    location: string;
+    startDate: string;
+    endDate: string;
+    categories: Array<{
+      id: string;
+      type: string;
+      registeredCount: number;
+      maxPlayers: number;
+    }>;
   };
+  pools: Array<{
+    name: string;
+    entries: Array<{
+      name: string;
+      wins: number;
+      losses: number;
+      pf: number;
+      pa: number;
+      diff: number;
+    }>;
+  }>;
+  bracketRounds: Array<{
+    name: string;
+    matches: Array<{
+      p1: string;
+      p2: string;
+      score: string | null;
+      winner: number | null;
+    }>;
+  }>;
+}) {
+  const t = useTranslations();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -74,7 +283,7 @@ function TournamentDetail() {
         <TabsContent value="categories" className="mt-6">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {tournament.categories.map((cat) => (
-              <Card key={cat.type}>
+              <Card key={cat.id}>
                 <CardHeader>
                   <CardTitle>{t(`category.${cat.type}`)}</CardTitle>
                 </CardHeader>
@@ -98,39 +307,41 @@ function TournamentDetail() {
         </TabsContent>
 
         <TabsContent value="pools" className="mt-6">
-          <PoolsView />
+          <PoolsView pools={pools} />
         </TabsContent>
 
         <TabsContent value="bracket" className="mt-6">
-          <BracketView />
+          <BracketView rounds={bracketRounds} />
         </TabsContent>
       </Tabs>
     </div>
   );
 }
 
-function PoolsView() {
+function PoolsView({
+  pools,
+}: {
+  pools: Array<{
+    name: string;
+    entries: Array<{
+      name: string;
+      wins: number;
+      losses: number;
+      pf: number;
+      pa: number;
+      diff: number;
+    }>;
+  }>;
+}) {
   const t = useTranslations();
 
-  // Placeholder pool data
-  const pools = [
-    {
-      name: "A",
-      entries: [
-        { name: "Tremblay, M.", wins: 2, losses: 0, pf: 84, pa: 56, diff: 28 },
-        { name: "Gagnon, S.", wins: 1, losses: 1, pf: 70, pa: 65, diff: 5 },
-        { name: "Roy, J.", wins: 0, losses: 2, pf: 48, pa: 81, diff: -33 },
-      ],
-    },
-    {
-      name: "B",
-      entries: [
-        { name: "Côté, A.", wins: 2, losses: 0, pf: 88, pa: 50, diff: 38 },
-        { name: "Bouchard, L.", wins: 1, losses: 1, pf: 72, pa: 68, diff: 4 },
-        { name: "Pelletier, D.", wins: 0, losses: 2, pf: 40, pa: 82, diff: -42 },
-      ],
-    },
-  ];
+  if (pools.length === 0) {
+    return (
+      <p className="text-center text-muted-foreground">
+        {t("tournament.noTournaments")}
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -203,34 +414,28 @@ function PoolsView() {
   );
 }
 
-function BracketView() {
+function BracketView({
+  rounds,
+}: {
+  rounds: Array<{
+    name: string;
+    matches: Array<{
+      p1: string;
+      p2: string;
+      score: string | null;
+      winner: number | null;
+    }>;
+  }>;
+}) {
   const t = useTranslations();
 
-  // Placeholder bracket data
-  const rounds = [
-    {
-      name: t("bracket.quarterfinals"),
-      matches: [
-        { p1: "Tremblay, M.", p2: "Pelletier, D.", score: "21-15, 21-12", winner: 1 },
-        { p1: "Côté, A.", p2: "Gagnon, S.", score: "21-18, 21-16", winner: 1 },
-        { p1: "Bouchard, L.", p2: "Roy, J.", score: null, winner: null },
-        { p1: "TBD", p2: "TBD", score: null, winner: null },
-      ],
-    },
-    {
-      name: t("bracket.semifinals"),
-      matches: [
-        { p1: "Tremblay, M.", p2: "Côté, A.", score: null, winner: null },
-        { p1: "TBD", p2: "TBD", score: null, winner: null },
-      ],
-    },
-    {
-      name: t("bracket.finals"),
-      matches: [
-        { p1: "TBD", p2: "TBD", score: null, winner: null },
-      ],
-    },
-  ];
+  if (rounds.length === 0) {
+    return (
+      <p className="text-center text-muted-foreground">
+        {t("tournament.noTournaments")}
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-8">

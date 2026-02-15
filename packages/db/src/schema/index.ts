@@ -9,3 +9,4 @@ export { brackets } from "./brackets";
 export { matches } from "./matches";
 export { courts } from "./courts";
 export { notifications } from "./notifications";
+export * from "./relations";
