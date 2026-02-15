@@ -1,0 +1,135 @@
+{
+  "common": {
+    "appName": "BSL Plume",
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "back": "Retour",
+    "search": "Rechercher",
+    "noResults": "Aucun résultat",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "actions": "Actions",
+    "status": "Statut",
+    "language": "Langue"
+  },
+  "nav": {
+    "home": "Accueil",
+    "tournaments": "Tournois",
+    "players": "Joueurs",
+    "admin": "Administration",
+    "profile": "Profil",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "register": "S'inscrire"
+  },
+  "home": {
+    "title": "Gestion de tournois de badminton",
+    "subtitle": "Organisez et suivez vos compétitions en temps réel",
+    "cta": "Voir les tournois",
+    "features": {
+      "realtime": "Suivi en temps réel",
+      "realtimeDesc": "Suivez les scores et les matchs en direct",
+      "registration": "Inscription en ligne",
+      "registrationDesc": "Inscrivez-vous facilement à un tournoi",
+      "brackets": "Tableaux automatiques",
+      "bracketsDesc": "Génération automatique des poules et tableaux"
+    }
+  },
+  "tournament": {
+    "title": "Tournois",
+    "create": {
+      "title": "Nouveau tournoi",
+      "submit": "Créer le tournoi"
+    },
+    "fields": {
+      "name": "Nom du tournoi",
+      "description": "Description",
+      "location": "Lieu",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "registrationStart": "Début des inscriptions",
+      "registrationEnd": "Fin des inscriptions",
+      "courtCount": "Nombre de terrains",
+      "categories": "Catégories"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "registration_open": "Inscriptions ouvertes",
+      "registration_closed": "Inscriptions fermées",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "noTournaments": "Aucun tournoi pour le moment",
+    "viewDetails": "Voir les détails",
+    "manage": "Gérer"
+  },
+  "category": {
+    "SH": "Simple Homme",
+    "SD": "Simple Dame",
+    "DH": "Double Homme",
+    "DD": "Double Dame",
+    "DX": "Double Mixte",
+    "maxPlayers": "Max joueurs"
+  },
+  "registration": {
+    "title": "Inscription",
+    "registerFor": "S'inscrire au tournoi",
+    "selectCategory": "Choisir une catégorie",
+    "partnerEmail": "Email du partenaire (doubles)",
+    "submit": "Confirmer l'inscription",
+    "status": {
+      "pending": "En attente",
+      "confirmed": "Confirmée",
+      "rejected": "Refusée",
+      "withdrawn": "Retirée"
+    },
+    "alreadyRegistered": "Vous êtes déjà inscrit à cette catégorie",
+    "registrationClosed": "Les inscriptions sont fermées",
+    "categoryFull": "Cette catégorie est complète"
+  },
+  "match": {
+    "vs": "vs",
+    "court": "Terrain",
+    "round": "Tour",
+    "score": "Score",
+    "set": "Set",
+    "status": {
+      "scheduled": "Planifié",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "walkover": "Forfait",
+      "retired": "Abandon",
+      "disqualified": "Disqualifié"
+    }
+  },
+  "pool": {
+    "title": "Poules",
+    "ranking": "Classement",
+    "wins": "V",
+    "losses": "D",
+    "pointsFor": "PF",
+    "pointsAgainst": "PC",
+    "diff": "Diff"
+  },
+  "bracket": {
+    "title": "Tableau",
+    "finals": "Finale",
+    "semifinals": "Demi-finales",
+    "quarterfinals": "Quarts de finale"
+  },
+  "admin": {
+    "dashboard": "Tableau de bord",
+    "tournaments": "Gestion des tournois",
+    "players": "Gestion des joueurs",
+    "courts": "Gestion des terrains",
+    "scoring": "Saisie des scores",
+    "generatePools": "Générer les poules",
+    "generateBracket": "Générer le tableau",
+    "confirmAction": "Êtes-vous sûr de vouloir effectuer cette action ?"
+  }
+}

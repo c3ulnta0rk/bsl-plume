@@ -1,0 +1,135 @@
+{
+  "common": {
+    "appName": "BSL Plume",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "search": "Search",
+    "noResults": "No results",
+    "confirm": "Confirm",
+    "close": "Close",
+    "actions": "Actions",
+    "status": "Status",
+    "language": "Language"
+  },
+  "nav": {
+    "home": "Home",
+    "tournaments": "Tournaments",
+    "players": "Players",
+    "admin": "Administration",
+    "profile": "Profile",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "register": "Sign up"
+  },
+  "home": {
+    "title": "Badminton Tournament Management",
+    "subtitle": "Organize and follow your competitions in real time",
+    "cta": "View tournaments",
+    "features": {
+      "realtime": "Real-time tracking",
+      "realtimeDesc": "Follow scores and matches live",
+      "registration": "Online registration",
+      "registrationDesc": "Easily register for a tournament",
+      "brackets": "Automatic brackets",
+      "bracketsDesc": "Automatic pool and bracket generation"
+    }
+  },
+  "tournament": {
+    "title": "Tournaments",
+    "create": {
+      "title": "New Tournament",
+      "submit": "Create Tournament"
+    },
+    "fields": {
+      "name": "Tournament name",
+      "description": "Description",
+      "location": "Location",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "registrationStart": "Registration start",
+      "registrationEnd": "Registration end",
+      "courtCount": "Number of courts",
+      "categories": "Categories"
+    },
+    "status": {
+      "draft": "Draft",
+      "registration_open": "Registration Open",
+      "registration_closed": "Registration Closed",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "noTournaments": "No tournaments yet",
+    "viewDetails": "View details",
+    "manage": "Manage"
+  },
+  "category": {
+    "SH": "Men's Singles",
+    "SD": "Women's Singles",
+    "DH": "Men's Doubles",
+    "DD": "Women's Doubles",
+    "DX": "Mixed Doubles",
+    "maxPlayers": "Max players"
+  },
+  "registration": {
+    "title": "Registration",
+    "registerFor": "Register for tournament",
+    "selectCategory": "Select a category",
+    "partnerEmail": "Partner's email (doubles)",
+    "submit": "Confirm registration",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "withdrawn": "Withdrawn"
+    },
+    "alreadyRegistered": "You are already registered for this category",
+    "registrationClosed": "Registration is closed",
+    "categoryFull": "This category is full"
+  },
+  "match": {
+    "vs": "vs",
+    "court": "Court",
+    "round": "Round",
+    "score": "Score",
+    "set": "Set",
+    "status": {
+      "scheduled": "Scheduled",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "walkover": "Walkover",
+      "retired": "Retired",
+      "disqualified": "Disqualified"
+    }
+  },
+  "pool": {
+    "title": "Pools",
+    "ranking": "Ranking",
+    "wins": "W",
+    "losses": "L",
+    "pointsFor": "PF",
+    "pointsAgainst": "PA",
+    "diff": "Diff"
+  },
+  "bracket": {
+    "title": "Bracket",
+    "finals": "Final",
+    "semifinals": "Semi-finals",
+    "quarterfinals": "Quarter-finals"
+  },
+  "admin": {
+    "dashboard": "Dashboard",
+    "tournaments": "Tournament Management",
+    "players": "Player Management",
+    "courts": "Court Management",
+    "scoring": "Score Entry",
+    "generatePools": "Generate Pools",
+    "generateBracket": "Generate Bracket",
+    "confirmAction": "Are you sure you want to perform this action?"
+  }
+}
