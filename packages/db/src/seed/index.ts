@@ -1,7 +1,25 @@
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createDb } from "../index";
 import { seedDevelopment } from "./scenarios/development";
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+function loadDatabaseUrl(): string {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  try {
+    const envPath = resolve(__dirname, "../../../../.env");
+    const content = readFileSync(envPath, "utf-8");
+    const match = content.match(/^DATABASE_URL=(.+)$/m);
+    return match?.[1]?.trim() ?? "";
+  } catch {
+    return "";
+  }
+}
+
+const DATABASE_URL = loadDatabaseUrl();
 if (!DATABASE_URL) {
   console.error("DATABASE_URL environment variable is required");
   process.exit(1);
