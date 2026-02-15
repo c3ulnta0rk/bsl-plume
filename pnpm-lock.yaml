@@ -166,6 +166,12 @@ importers:
       '@bsl-plume/config':
         specifier: workspace:*
         version: link:../config
+      '@types/react':
+        specifier: ^19
+        version: 19.0.0
+      react:
+        specifier: ^19
+        version: 19.2.3
       vitest:
         specifier: ^3
         version: 3.0.0(@types/node@20.0.0)(tsx@4.8.0)

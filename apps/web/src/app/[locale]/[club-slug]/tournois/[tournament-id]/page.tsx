@@ -18,9 +18,13 @@ import {
   listPoolEntries,
   getBracketByCategory,
   listMatchesByBracket,
+  getPlayerById,
+  getPlayerByUserId,
+  getRegistration,
 } from "@bsl-plume/db/queries";
-import { getPlayerById } from "@bsl-plume/db/queries";
 import { notFound } from "next/navigation";
+import { getSession } from "@/lib/session";
+import { RegisterButton } from "./register-button";
 
 export default async function TournamentDetailPage({
   params,
@@ -31,7 +35,11 @@ export default async function TournamentDetailPage({
     "tournament-id": string;
   }>;
 }) {
-  const { locale, "tournament-id": tournamentId } = await params;
+  const {
+    locale,
+    "club-slug": clubSlug,
+    "tournament-id": tournamentId,
+  } = await params;
   setRequestLocale(locale);
 
   const tournament = await getTournamentById(db, tournamentId);
@@ -41,19 +49,36 @@ export default async function TournamentDetailPage({
 
   const categories = await listCategoriesByTournament(db, tournament.id);
 
+  // Check if user is logged in and has a player profile
+  const session = await getSession();
+  const player = session ? await getPlayerByUserId(db, session.user.id) : null;
+  const isRegistrationOpen = tournament.status === "registration_open";
+
   const categoriesWithCount = await Promise.all(
     categories.map(async (cat) => {
       const [countResult] = await countRegistrationsByCategory(db, cat.id);
+      const registeredCount = countResult?.count ?? 0;
+
+      // Check if player is registered for this category
+      let registrationId: string | null = null;
+      if (player) {
+        const reg = await getRegistration(db, player.id, cat.id);
+        if (reg) registrationId = reg.id;
+      }
+
       return {
         id: cat.id,
         type: cat.type,
         maxPlayers: cat.maxPlayers,
-        registeredCount: countResult?.count ?? 0,
+        registeredCount,
+        isRegistered: registrationId !== null,
+        registrationId,
+        isFull: registeredCount >= cat.maxPlayers,
       };
     }),
   );
 
-  // Load pools for first category that has them
+  // Load pools
   const poolsData = await Promise.all(
     categories.map(async (cat) => {
       const pools = await listPoolsByCategory(db, cat.id);
@@ -63,10 +88,10 @@ export default async function TournamentDetailPage({
 
           const entriesWithNames = await Promise.all(
             entries.map(async (entry) => {
-              const player = await getPlayerById(db, entry.playerId);
+              const p = await getPlayerById(db, entry.playerId);
               return {
-                name: player
-                  ? `${player.lastName}, ${player.firstName.charAt(0)}.`
+                name: p
+                  ? `${p.lastName}, ${p.firstName.charAt(0)}.`
                   : entry.playerId.slice(0, 8),
                 wins: entry.wins,
                 losses: entry.losses,
@@ -188,6 +213,10 @@ export default async function TournamentDetailPage({
       }}
       pools={allPools}
       bracketRounds={bracketRounds}
+      clubSlug={clubSlug}
+      isLoggedIn={session !== null}
+      hasPlayerProfile={player !== null}
+      isRegistrationOpen={isRegistrationOpen}
     />
   );
 }
@@ -217,6 +246,10 @@ function TournamentDetail({
   tournament,
   pools,
   bracketRounds,
+  clubSlug,
+  isLoggedIn,
+  hasPlayerProfile,
+  isRegistrationOpen,
 }: {
   tournament: {
     name: string;
@@ -229,6 +262,9 @@ function TournamentDetail({
       type: string;
       registeredCount: number;
       maxPlayers: number;
+      isRegistered: boolean;
+      registrationId: string | null;
+      isFull: boolean;
     }>;
   };
   pools: Array<{
@@ -251,6 +287,10 @@ function TournamentDetail({
       winner: number | null;
     }>;
   }>;
+  clubSlug: string;
+  isLoggedIn: boolean;
+  hasPlayerProfile: boolean;
+  isRegistrationOpen: boolean;
 }) {
   const t = useTranslations();
 
@@ -300,6 +340,21 @@ function TournamentDetail({
                       }}
                     />
                   </div>
+                  {isLoggedIn && hasPlayerProfile && isRegistrationOpen && (
+                    <RegisterButton
+                      categoryId={cat.id}
+                      clubSlug={clubSlug}
+                      isRegistered={cat.isRegistered}
+                      registrationId={cat.registrationId}
+                      isOpen={isRegistrationOpen}
+                      isFull={cat.isFull}
+                    />
+                  )}
+                  {isLoggedIn && hasPlayerProfile && cat.isRegistered && (
+                    <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                      {t("registration.alreadyRegistered")}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             ))}

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,18 +13,65 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { createTournamentAction } from "@/app/actions/tournament";
 
 const CATEGORY_OPTIONS = ["SH", "SD", "DH", "DD", "DX"] as const;
+const DEFAULT_MAX_PLAYERS: Record<string, number> = {
+  SH: 32,
+  SD: 32,
+  DH: 16,
+  DD: 16,
+  DX: 16,
+};
 
-export function CreateTournamentForm() {
+export function CreateTournamentForm({
+  clubId,
+  clubSlug,
+}: {
+  clubId: string;
+  clubSlug: string;
+}) {
   const t = useTranslations();
+  const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   function toggleCategory(cat: string) {
     setSelectedCategories((prev) =>
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
     );
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    const result = await createTournamentAction(clubId, clubSlug, {
+      name: formData.get("name") as string,
+      description: (formData.get("description") as string) || null,
+      location: (formData.get("location") as string) || null,
+      startDate: formData.get("startDate") as string,
+      endDate: formData.get("endDate") as string,
+      registrationStart: formData.get("registrationStart") as string,
+      registrationEnd: formData.get("registrationEnd") as string,
+      courtCount: Number(formData.get("courtCount")) || 4,
+      categories: selectedCategories.map((type) => ({
+        type,
+        maxPlayers: DEFAULT_MAX_PLAYERS[type] ?? 32,
+      })),
+    });
+
+    if (!result.success) {
+      setError(result.error);
+      setIsLoading(false);
+      return;
+    }
+
+    router.push(`/${clubSlug}/admin/tournois/${result.data.id}`);
   }
 
   return (
@@ -31,7 +80,7 @@ export function CreateTournamentForm() {
         <CardTitle>{t("tournament.create.title")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">{t("tournament.fields.name")}</Label>
             <Input
@@ -143,8 +192,16 @@ export function CreateTournamentForm() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            {t("tournament.create.submit")}
+          {error && (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading
+              ? t("common.loading")
+              : t("tournament.create.submit")}
           </Button>
         </form>
       </CardContent>

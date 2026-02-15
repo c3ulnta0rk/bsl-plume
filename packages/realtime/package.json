@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./react": {
+      "types": "./src/react.ts",
+      "default": "./src/react.ts"
     }
   },
   "scripts": {
@@ -17,8 +21,13 @@
   "dependencies": {
     "@supabase/supabase-js": "^2"
   },
+  "peerDependencies": {
+    "react": "^19"
+  },
   "devDependencies": {
     "@bsl-plume/config": "workspace:*",
+    "@types/react": "^19",
+    "react": "^19",
     "vitest": "^3"
   }
 }
