@@ -25,9 +25,9 @@ export async function registerForCategoryAction(
   partnerId?: string,
   partnerEmail?: string,
 ): Promise<ActionResult<{ id: string }>> {
-  const session = await requireSession();
+  const user = await requireSession();
 
-  const player = await getPlayerByUserId(db, session.user.id);
+  const player = await getPlayerByUserId(db, user.id);
   if (!player) {
     return { success: false, error: "Player profile not found" };
   }
@@ -74,9 +74,9 @@ export async function withdrawRegistrationAction(
   registrationId: string,
   clubSlug: string,
 ): Promise<ActionResult> {
-  const session = await requireSession();
+  const user = await requireSession();
 
-  const player = await getPlayerByUserId(db, session.user.id);
+  const player = await getPlayerByUserId(db, user.id);
   if (!player) {
     return { success: false, error: "Player profile not found" };
   }

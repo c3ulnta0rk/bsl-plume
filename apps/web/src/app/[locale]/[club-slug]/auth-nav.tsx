@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { authClient } from "@/lib/auth-client";
+import { createBrowserSupabaseClient } from "@/lib/supabase";
 
 export function AuthNav({
   action,
@@ -17,7 +17,8 @@ export function AuthNav({
   const router = useRouter();
 
   async function handleLogout() {
-    await authClient.signOut();
+    const supabase = createBrowserSupabaseClient();
+    await supabase.auth.signOut();
     router.push(`/${locale}/${clubSlug}`);
     router.refresh();
   }

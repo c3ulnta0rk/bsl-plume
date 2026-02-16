@@ -14,9 +14,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { createBrowserSupabaseClient } from "@/lib/supabase";
 
-export function SignInForm() {
+export function SignInForm({ callbackUrl }: { callbackUrl?: string }) {
   const t = useTranslations("auth");
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -29,18 +29,19 @@ export function SignInForm() {
     setError(null);
     setIsLoading(true);
 
-    const result = await authClient.signIn.email({
+    const supabase = createBrowserSupabaseClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (result.error) {
-      setError(result.error.message ?? t("errors.invalidCredentials"));
+    if (authError) {
+      setError(authError.message ?? t("errors.invalidCredentials"));
       setIsLoading(false);
       return;
     }
 
-    router.push("/");
+    router.push(callbackUrl ?? "/");
     router.refresh();
   }
 

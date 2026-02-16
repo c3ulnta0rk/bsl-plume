@@ -22,7 +22,7 @@ export async function submitScoreAction(
   matchId: string,
   sets: Array<{ score1: number; score2: number }>,
   clubSlug: string,
-): Promise<ActionResult> {
+): Promise<ActionResult<{ winnerId: string }>> {
   await requireSession();
 
   const match = await getMatchById(db, matchId);
@@ -64,7 +64,7 @@ export async function submitScoreAction(
   });
 
   revalidatePath(`/${clubSlug}`);
-  return { success: true, data: undefined };
+  return { success: true, data: { winnerId: result.winnerId } };
 }
 
 export async function assignCourtAction(

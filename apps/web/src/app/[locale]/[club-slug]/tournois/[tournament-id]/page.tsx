@@ -25,6 +25,13 @@ import {
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { RegisterButton } from "./register-button";
+import { RealtimeRefresher } from "@/components/realtime-refresher";
+import { PoolsView, type CategoryPools } from "@/components/tournament/pools-view";
+import {
+  BracketView,
+  type BracketMatchData,
+  type CategoryBracket,
+} from "@/components/tournament/bracket-view";
 
 export default async function TournamentDetailPage({
   params,
@@ -49,9 +56,8 @@ export default async function TournamentDetailPage({
 
   const categories = await listCategoriesByTournament(db, tournament.id);
 
-  // Check if user is logged in and has a player profile
-  const session = await getSession();
-  const player = session ? await getPlayerByUserId(db, session.user.id) : null;
+  const user = await getSession();
+  const player = user ? await getPlayerByUserId(db, user.id) : null;
   const isRegistrationOpen = tournament.status === "registration_open";
 
   const categoriesWithCount = await Promise.all(
@@ -59,7 +65,6 @@ export default async function TournamentDetailPage({
       const [countResult] = await countRegistrationsByCategory(db, cat.id);
       const registeredCount = countResult?.count ?? 0;
 
-      // Check if player is registered for this category
       let registrationId: string | null = null;
       if (player) {
         const reg = await getRegistration(db, player.id, cat.id);
@@ -78,21 +83,25 @@ export default async function TournamentDetailPage({
     }),
   );
 
-  // Load pools
-  const poolsData = await Promise.all(
+  // Helper to resolve player name
+  async function resolvePlayerName(playerId: string | null): Promise<string> {
+    if (!playerId) return "TBD";
+    const p = await getPlayerById(db, playerId);
+    return p ? `${p.lastName}, ${p.firstName.charAt(0)}.` : "TBD";
+  }
+
+  // Load pools grouped by category
+  const categoryPoolsData: CategoryPools[] = await Promise.all(
     categories.map(async (cat) => {
       const pools = await listPoolsByCategory(db, cat.id);
-      return Promise.all(
+      const poolsWithEntries = await Promise.all(
         pools.map(async (pool) => {
           const entries = await listPoolEntries(db, pool.id);
-
           const entriesWithNames = await Promise.all(
             entries.map(async (entry) => {
-              const p = await getPlayerById(db, entry.playerId);
+              const name = await resolvePlayerName(entry.playerId);
               return {
-                name: p
-                  ? `${p.lastName}, ${p.firstName.charAt(0)}.`
-                  : entry.playerId.slice(0, 8),
+                name,
                 wins: entry.wins,
                 losses: entry.losses,
                 pf: entry.pointsFor,
@@ -101,151 +110,103 @@ export default async function TournamentDetailPage({
               };
             }),
           );
+          entriesWithNames.sort(
+            (a, b) => b.wins - a.wins || (b.pf - b.pa) - (a.pf - a.pa),
+          );
+          return { name: pool.name, entries: entriesWithNames };
+        }),
+      );
+      return { categoryType: cat.type, pools: poolsWithEntries };
+    }),
+  );
+
+  // Load brackets grouped by category
+  const categoryBracketsData: CategoryBracket[] = await Promise.all(
+    categories.map(async (cat) => {
+      const bracket = await getBracketByCategory(db, cat.id);
+      if (!bracket) {
+        return { categoryType: cat.type, roundCount: 0, matches: [] };
+      }
+      const matchList = await listMatchesByBracket(db, bracket.id);
+
+      const matches: BracketMatchData[] = await Promise.all(
+        matchList.map(async (m) => {
+          const p1Name = await resolvePlayerName(m.participant1Id);
+          const p2Name = await resolvePlayerName(m.participant2Id);
+
+          const sets: Array<{ p1: number; p2: number }> = [];
+          if (m.scoreSet1P1 !== null && m.scoreSet1P2 !== null) {
+            sets.push({ p1: m.scoreSet1P1, p2: m.scoreSet1P2 });
+          }
+          if (m.scoreSet2P1 !== null && m.scoreSet2P2 !== null) {
+            sets.push({ p1: m.scoreSet2P1, p2: m.scoreSet2P2 });
+          }
+          if (m.scoreSet3P1 !== null && m.scoreSet3P2 !== null) {
+            sets.push({ p1: m.scoreSet3P1, p2: m.scoreSet3P2 });
+          }
 
           return {
-            name: pool.name,
-            entries: entriesWithNames,
+            id: m.id,
+            round: m.round,
+            position: m.position,
+            p1: p1Name,
+            p2: p2Name,
+            sets,
+            winner:
+              m.winnerId === m.participant1Id
+                ? (1 as const)
+                : m.winnerId === m.participant2Id
+                  ? (2 as const)
+                  : null,
+            status: m.status,
+            courtNumber: m.courtNumber,
           };
         }),
       );
+
+      return {
+        categoryType: cat.type,
+        roundCount: bracket.roundCount,
+        matches,
+      };
     }),
   );
-
-  const allPools = poolsData.flat();
-
-  // Load bracket data
-  const bracketData = await Promise.all(
-    categories.map(async (cat) => {
-      const bracket = await getBracketByCategory(db, cat.id);
-      if (!bracket) return null;
-      const matches = await listMatchesByBracket(db, bracket.id);
-      return { bracket, matches };
-    }),
-  );
-  const activeBracket = bracketData.find((b) => b !== null);
-
-  // Build bracket rounds for display
-  const bracketRounds: Array<{
-    name: string;
-    matches: Array<{
-      p1: string;
-      p2: string;
-      score: string | null;
-      winner: number | null;
-    }>;
-  }> = [];
-
-  if (activeBracket) {
-    const roundGroups = new Map<number, typeof activeBracket.matches>();
-    for (const match of activeBracket.matches) {
-      const existing = roundGroups.get(match.round) ?? [];
-      existing.push(match);
-      roundGroups.set(match.round, existing);
-    }
-
-    const sortedRounds = [...roundGroups.entries()].sort(
-      ([a], [b]) => a - b,
-    );
-
-    for (const [roundNum, roundMatches] of sortedRounds) {
-      const roundName =
-        roundMatches.length === 1
-          ? "Finale"
-          : roundMatches.length === 2
-            ? "Demi-finales"
-            : roundMatches.length === 4
-              ? "Quarts de finale"
-              : `Tour ${roundNum}`;
-
-      bracketRounds.push({
-        name: roundName,
-        matches: await Promise.all(
-          roundMatches.map(async (m) => {
-            const p1 = m.participant1Id
-              ? await getPlayerById(db, m.participant1Id)
-              : null;
-            const p2 = m.participant2Id
-              ? await getPlayerById(db, m.participant2Id)
-              : null;
-
-            const score = m.status === "completed" && m.scoreSet1P1 !== null
-              ? formatScore(m)
-              : null;
-
-            return {
-              p1: p1
-                ? `${p1.lastName}, ${p1.firstName.charAt(0)}.`
-                : "TBD",
-              p2: p2
-                ? `${p2.lastName}, ${p2.firstName.charAt(0)}.`
-                : "TBD",
-              score,
-              winner:
-                m.winnerId === m.participant1Id
-                  ? 1
-                  : m.winnerId === m.participant2Id
-                    ? 2
-                    : null,
-            };
-          }),
-        ),
-      });
-    }
-  }
 
   return (
-    <TournamentDetail
-      tournament={{
-        name: tournament.name,
-        status: tournament.status,
-        location: tournament.location ?? "",
-        startDate: tournament.startDate.toLocaleDateString(locale, {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        endDate: tournament.endDate.toLocaleDateString(locale, {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        categories: categoriesWithCount,
-      }}
-      pools={allPools}
-      bracketRounds={bracketRounds}
-      clubSlug={clubSlug}
-      isLoggedIn={session !== null}
-      hasPlayerProfile={player !== null}
-      isRegistrationOpen={isRegistrationOpen}
-    />
+    <>
+      <RealtimeRefresher tournamentId={tournament.id} />
+      <TournamentDetail
+        tournament={{
+          name: tournament.name,
+          status: tournament.status,
+          location: tournament.location ?? "",
+          startDate: tournament.startDate.toLocaleDateString(locale, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          endDate: tournament.endDate.toLocaleDateString(locale, {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          categories: categoriesWithCount,
+        }}
+        categoryPools={categoryPoolsData}
+        categoryBrackets={categoryBracketsData}
+        clubSlug={clubSlug}
+        isLoggedIn={user !== null}
+        hasPlayerProfile={player !== null}
+        isRegistrationOpen={isRegistrationOpen}
+      />
+    </>
   );
-}
-
-function formatScore(m: {
-  scoreSet1P1: number | null;
-  scoreSet1P2: number | null;
-  scoreSet2P1: number | null;
-  scoreSet2P2: number | null;
-  scoreSet3P1: number | null;
-  scoreSet3P2: number | null;
-}): string {
-  const sets: string[] = [];
-  if (m.scoreSet1P1 !== null && m.scoreSet1P2 !== null) {
-    sets.push(`${m.scoreSet1P1}-${m.scoreSet1P2}`);
-  }
-  if (m.scoreSet2P1 !== null && m.scoreSet2P2 !== null) {
-    sets.push(`${m.scoreSet2P1}-${m.scoreSet2P2}`);
-  }
-  if (m.scoreSet3P1 !== null && m.scoreSet3P2 !== null) {
-    sets.push(`${m.scoreSet3P1}-${m.scoreSet3P2}`);
-  }
-  return sets.join(", ");
 }
 
 function TournamentDetail({
   tournament,
-  pools,
-  bracketRounds,
+  categoryPools,
+  categoryBrackets,
   clubSlug,
   isLoggedIn,
   hasPlayerProfile,
@@ -267,26 +228,8 @@ function TournamentDetail({
       isFull: boolean;
     }>;
   };
-  pools: Array<{
-    name: string;
-    entries: Array<{
-      name: string;
-      wins: number;
-      losses: number;
-      pf: number;
-      pa: number;
-      diff: number;
-    }>;
-  }>;
-  bracketRounds: Array<{
-    name: string;
-    matches: Array<{
-      p1: string;
-      p2: string;
-      score: string | null;
-      winner: number | null;
-    }>;
-  }>;
+  categoryPools: CategoryPools[];
+  categoryBrackets: CategoryBracket[];
   clubSlug: string;
   isLoggedIn: boolean;
   hasPlayerProfile: boolean;
@@ -362,181 +305,13 @@ function TournamentDetail({
         </TabsContent>
 
         <TabsContent value="pools" className="mt-6">
-          <PoolsView pools={pools} />
+          <PoolsView categories={categoryPools} />
         </TabsContent>
 
         <TabsContent value="bracket" className="mt-6">
-          <BracketView rounds={bracketRounds} />
+          <BracketView categories={categoryBrackets} />
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function PoolsView({
-  pools,
-}: {
-  pools: Array<{
-    name: string;
-    entries: Array<{
-      name: string;
-      wins: number;
-      losses: number;
-      pf: number;
-      pa: number;
-      diff: number;
-    }>;
-  }>;
-}) {
-  const t = useTranslations();
-
-  if (pools.length === 0) {
-    return (
-      <p className="text-center text-muted-foreground">
-        {t("tournament.noTournaments")}
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {pools.map((pool) => (
-        <Card key={pool.name}>
-          <CardHeader>
-            <CardTitle>
-              {t("pool.title")} {pool.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left">
-                    <th className="pb-2 font-medium">{t("pool.ranking")}</th>
-                    <th className="pb-2 text-center font-medium">
-                      {t("pool.wins")}
-                    </th>
-                    <th className="pb-2 text-center font-medium">
-                      {t("pool.losses")}
-                    </th>
-                    <th className="pb-2 text-center font-medium">
-                      {t("pool.pointsFor")}
-                    </th>
-                    <th className="pb-2 text-center font-medium">
-                      {t("pool.pointsAgainst")}
-                    </th>
-                    <th className="pb-2 text-center font-medium">
-                      {t("pool.diff")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pool.entries.map((entry, index) => (
-                    <tr key={entry.name} className="border-b last:border-0">
-                      <td className="py-2">
-                        <span className="mr-2 text-muted-foreground">
-                          {index + 1}.
-                        </span>
-                        {entry.name}
-                      </td>
-                      <td className="py-2 text-center">{entry.wins}</td>
-                      <td className="py-2 text-center">{entry.losses}</td>
-                      <td className="py-2 text-center">{entry.pf}</td>
-                      <td className="py-2 text-center">{entry.pa}</td>
-                      <td className="py-2 text-center">
-                        <span
-                          className={
-                            entry.diff > 0
-                              ? "text-green-600 dark:text-green-400"
-                              : entry.diff < 0
-                                ? "text-red-600 dark:text-red-400"
-                                : ""
-                          }
-                        >
-                          {entry.diff > 0 ? "+" : ""}
-                          {entry.diff}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function BracketView({
-  rounds,
-}: {
-  rounds: Array<{
-    name: string;
-    matches: Array<{
-      p1: string;
-      p2: string;
-      score: string | null;
-      winner: number | null;
-    }>;
-  }>;
-}) {
-  const t = useTranslations();
-
-  if (rounds.length === 0) {
-    return (
-      <p className="text-center text-muted-foreground">
-        {t("tournament.noTournaments")}
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-8">
-      {rounds.map((round) => (
-        <div key={round.name}>
-          <h3 className="mb-4 text-lg font-semibold">{round.name}</h3>
-          <div className="grid gap-3 md:grid-cols-2">
-            {round.matches.map((match, index) => (
-              <Card
-                key={`${round.name}-${index}`}
-                className={match.score ? "border-primary/20" : ""}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <p
-                        className={`text-sm ${
-                          match.winner === 1 ? "font-bold" : ""
-                        }`}
-                      >
-                        {match.p1}
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          match.winner === 2 ? "font-bold" : ""
-                        }`}
-                      >
-                        {match.p2}
-                      </p>
-                    </div>
-                    {match.score ? (
-                      <Badge variant="secondary" className="text-xs">
-                        {match.score}
-                      </Badge>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        {t("match.status.scheduled")}
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }

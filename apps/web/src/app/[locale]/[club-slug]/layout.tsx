@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
 import { getClubBySlug, getClubMembership } from "@bsl-plume/db/queries";
 import { AuthNav } from "./auth-nav";
+import { RealtimeProviderWrapper } from "@/providers/realtime-provider";
 
 export default async function ClubLayout({
   children,
@@ -16,12 +17,12 @@ export default async function ClubLayout({
   const { locale, "club-slug": clubSlug } = await params;
   setRequestLocale(locale);
 
-  const session = await getSession();
+  const user = await getSession();
   const club = await getClubBySlug(db, clubSlug);
 
   let isAdmin = false;
-  if (session && club) {
-    const membership = await getClubMembership(db, session.user.id, club.id);
+  if (user && club) {
+    const membership = await getClubMembership(db, user.id, club.id);
     isAdmin = membership?.role === "admin";
   }
 
@@ -31,11 +32,13 @@ export default async function ClubLayout({
         clubSlug={clubSlug}
         clubName={club?.name ?? clubSlug}
         locale={locale}
-        isLoggedIn={session !== null}
+        isLoggedIn={user !== null}
         isAdmin={isAdmin}
-        userName={session?.user.name ?? null}
+        userName={(user?.user_metadata?.name as string) ?? null}
       />
-      <main className="flex-1">{children}</main>
+      <RealtimeProviderWrapper>
+        <main className="flex-1">{children}</main>
+      </RealtimeProviderWrapper>
       <footer className="border-t py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           BSL Plume — {club?.name ?? clubSlug}

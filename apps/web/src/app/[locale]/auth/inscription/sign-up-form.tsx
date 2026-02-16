@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { authClient } from "@/lib/auth-client";
+import { createBrowserSupabaseClient } from "@/lib/supabase";
 
 export function SignUpForm() {
   const t = useTranslations("auth");
@@ -42,14 +42,17 @@ export function SignUpForm() {
 
     setIsLoading(true);
 
-    const result = await authClient.signUp.email({
+    const supabase = createBrowserSupabaseClient();
+    const { error: authError } = await supabase.auth.signUp({
       email,
       password,
-      name,
+      options: {
+        data: { name, locale: "fr" },
+      },
     });
 
-    if (result.error) {
-      setError(result.error.message ?? t("errors.signUpFailed"));
+    if (authError) {
+      setError(authError.message ?? t("errors.signUpFailed"));
       setIsLoading(false);
       return;
     }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,9 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { useTournamentChannel } from "@bsl-plume/realtime/react";
+import type { RealtimeEvent } from "@bsl-plume/realtime";
+import { useRealtime } from "@/providers/realtime-provider";
 import { StatusControls } from "./status-controls";
 import { CategoryActions } from "./category-actions";
 import { MatchScoreForm } from "./match-score-form";
@@ -78,7 +82,24 @@ export function AdminTournamentDetail({
   courts: CourtData[];
 }) {
   const t = useTranslations();
+  const router = useRouter();
+  const provider = useRealtime();
   const [scoringMatchId, setScoringMatchId] = useState<string | null>(null);
+
+  // Subscribe to tournament channel — refresh on events from other clients
+  const onEvent = useCallback(() => {
+    router.refresh();
+  }, [router]);
+  useTournamentChannel(provider, tournament.id, onEvent);
+
+  // Publish realtime event to all connected clients
+  const publishEvent = useCallback(
+    async (event: RealtimeEvent) => {
+      if (!provider) return;
+      await provider.publish(`tournament:${tournament.id}`, event);
+    },
+    [provider, tournament.id],
+  );
 
   const totalRegistrations = categories.reduce(
     (sum, c) => sum + c.registeredCount,
@@ -214,6 +235,7 @@ export function AdminTournamentDetail({
                     hasBracket={cat.hasBracket}
                     clubId={clubId}
                     clubSlug={clubSlug}
+                    onPublish={publishEvent}
                   />
                 </CardContent>
               </Card>
@@ -309,6 +331,7 @@ export function AdminTournamentDetail({
                         onScore={() => setScoringMatchId(match.id)}
                         tournamentId={tournament.id}
                         clubSlug={clubSlug}
+                        onPublish={publishEvent}
                       />
                     ))}
                   </div>
@@ -329,6 +352,7 @@ export function AdminTournamentDetail({
                         onScore={() => setScoringMatchId(match.id)}
                         tournamentId={tournament.id}
                         clubSlug={clubSlug}
+                        onPublish={publishEvent}
                       />
                     ))}
                   </div>
@@ -366,6 +390,7 @@ export function AdminTournamentDetail({
               match={matches.find((m) => m.id === scoringMatchId)!}
               clubSlug={clubSlug}
               onClose={() => setScoringMatchId(null)}
+              onPublish={publishEvent}
             />
           )}
         </TabsContent>
@@ -379,11 +404,13 @@ function MatchCard({
   onScore,
   tournamentId,
   clubSlug,
+  onPublish,
 }: {
   match: MatchData;
   onScore?: () => void;
   tournamentId: string;
   clubSlug: string;
+  onPublish?: (event: RealtimeEvent) => Promise<void>;
 }) {
   const t = useTranslations();
   const [isAssigning, setIsAssigning] = useState(false);
@@ -391,7 +418,14 @@ function MatchCard({
   async function handleAssignCourt() {
     setIsAssigning(true);
     const { assignCourtAction } = await import("@/app/actions/scoring");
-    await assignCourtAction(match.id, tournamentId, clubSlug);
+    const result = await assignCourtAction(match.id, tournamentId, clubSlug);
+    if (result.success) {
+      await onPublish?.({
+        type: "match:started",
+        matchId: match.id,
+        courtNumber: result.data.courtNumber,
+      });
+    }
     setIsAssigning(false);
   }
 

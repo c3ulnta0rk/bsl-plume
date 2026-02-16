@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import Link from "next/link";
+import { getSession } from "@/lib/session";
 
 export default async function HomePage({
   params,
@@ -10,32 +11,43 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  return <HomeContent />;
+  const user = await getSession();
+
+  return <HomeContent locale={locale} user={user} />;
 }
 
-function HomeContent() {
+function HomeContent({
+  locale,
+  user,
+}: {
+  locale: string;
+  user: { user_metadata?: { name?: string } } | null;
+}) {
   const t = useTranslations();
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-background">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold">
+          <Link href={`/${locale}`} className="text-xl font-bold">
             {t("common.appName")}
           </Link>
           <nav className="flex items-center gap-4">
-            <Link
-              href="/rimouski/tournois"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {t("nav.tournaments")}
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
-            >
-              {t("nav.login")}
-            </Link>
+            {user ? (
+              <Link
+                href={`/${locale}/bsl-badminton`}
+                className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
+              >
+                {(user.user_metadata?.name as string) ?? t("nav.profile")}
+              </Link>
+            ) : (
+              <Link
+                href={`/${locale}/auth/connexion`}
+                className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
+              >
+                {t("nav.login")}
+              </Link>
+            )}
           </nav>
         </div>
       </header>
@@ -50,7 +62,7 @@ function HomeContent() {
           </p>
           <div className="mt-8">
             <Link
-              href="/rimouski/tournois"
+              href={`/${locale}/bsl-badminton`}
               className="rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               {t("home.cta")}

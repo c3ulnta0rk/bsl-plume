@@ -20,7 +20,6 @@ const nextConfig: NextConfig = {
     "@bsl-plume/validators",
     "@bsl-plume/tournament-engine",
     "@bsl-plume/db",
-    "@bsl-plume/auth",
     "@bsl-plume/realtime",
   ],
   turbopack: {

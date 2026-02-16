@@ -27,9 +27,9 @@ export async function generatePoolsAction(
   clubSlug: string,
   clubId: string,
 ): Promise<ActionResult> {
-  const session = await requireSession();
+  const user = await requireSession();
 
-  const membership = await getClubMembership(db, session.user.id, clubId);
+  const membership = await getClubMembership(db, user.id, clubId);
   if (!membership || membership.role !== "admin") {
     return { success: false, error: "Unauthorized" };
   }
@@ -98,9 +98,9 @@ export async function generateBracketAction(
   clubSlug: string,
   clubId: string,
 ): Promise<ActionResult> {
-  const session = await requireSession();
+  const user = await requireSession();
 
-  const membership = await getClubMembership(db, session.user.id, clubId);
+  const membership = await getClubMembership(db, user.id, clubId);
   if (!membership || membership.role !== "admin") {
     return { success: false, error: "Unauthorized" };
   }

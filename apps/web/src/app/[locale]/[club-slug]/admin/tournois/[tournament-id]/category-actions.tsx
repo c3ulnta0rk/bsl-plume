@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { RealtimeEvent } from "@bsl-plume/realtime";
 import {
   generatePoolsAction,
   generateBracketAction,
@@ -18,6 +19,7 @@ export function CategoryActions({
   hasBracket,
   clubId,
   clubSlug,
+  onPublish,
 }: {
   categoryId: string;
   registeredCount: number;
@@ -25,6 +27,7 @@ export function CategoryActions({
   hasBracket: boolean;
   clubId: string;
   clubSlug: string;
+  onPublish?: (event: RealtimeEvent) => Promise<void>;
 }) {
   const t = useTranslations();
   const router = useRouter();
@@ -47,6 +50,11 @@ export function CategoryActions({
     if (!result.success) {
       setError(result.error);
     } else {
+      await onPublish?.({
+        type: "pool:updated",
+        poolId: "",
+        categoryId,
+      });
       router.refresh();
     }
     setIsGeneratingPools(false);
@@ -61,6 +69,11 @@ export function CategoryActions({
     if (!result.success) {
       setError(result.error);
     } else {
+      await onPublish?.({
+        type: "bracket:updated",
+        bracketId: "",
+        categoryId,
+      });
       router.refresh();
     }
     setIsGeneratingBracket(false);

@@ -13,12 +13,12 @@ export default async function PlayerProfilePage({
   const { locale, "club-slug": clubSlug } = await params;
   setRequestLocale(locale);
 
-  const session = await getSession();
-  if (!session) {
+  const user = await getSession();
+  if (!user) {
     redirect(`/${locale}/auth/connexion`);
   }
 
-  const player = await getPlayerByUserId(db, session.user.id);
+  const player = await getPlayerByUserId(db, user.id);
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">

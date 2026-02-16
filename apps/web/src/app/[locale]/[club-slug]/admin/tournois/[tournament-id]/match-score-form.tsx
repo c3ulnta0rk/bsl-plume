@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { RealtimeEvent } from "@bsl-plume/realtime";
 import { submitScoreAction } from "@/app/actions/scoring";
 
 export function MatchScoreForm({
@@ -19,6 +20,7 @@ export function MatchScoreForm({
   match,
   clubSlug,
   onClose,
+  onPublish,
 }: {
   matchId: string;
   match: {
@@ -27,6 +29,7 @@ export function MatchScoreForm({
   };
   clubSlug: string;
   onClose: () => void;
+  onPublish?: (event: RealtimeEvent) => Promise<void>;
 }) {
   const t = useTranslations();
   const router = useRouter();
@@ -69,6 +72,13 @@ export function MatchScoreForm({
       setIsSubmitting(false);
       return;
     }
+
+    await onPublish?.({
+      type: "match:ended",
+      matchId,
+      winnerId: result.data.winnerId,
+      score: { sets: playedSets },
+    });
 
     router.refresh();
     onClose();

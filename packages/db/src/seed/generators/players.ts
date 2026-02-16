@@ -4,12 +4,22 @@ import type { Database } from "../../index";
 import { players } from "../../schema/players";
 import { registrations } from "../../schema/registrations";
 
+export interface RegistrationConfig {
+  categoryId: string;
+  playerCount: number;
+  status: "confirmed" | "pending" | "mixed";
+}
+
+/**
+ * Seed players and register them to specific categories.
+ * Players are created once then distributed across registration configs.
+ */
 export async function seedPlayers(
   db: Database,
   count: number,
-  categoryIds: string[],
+  registrationConfigs: RegistrationConfig[],
 ) {
-  const seedPlayers = Array.from({ length: count }, () => ({
+  const seedData = Array.from({ length: count }, () => ({
     userId: randomUUID(),
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
@@ -28,29 +38,35 @@ export async function seedPlayers(
 
   const createdPlayers = await db
     .insert(players)
-    .values(seedPlayers)
+    .values(seedData)
     .returning();
 
-  // Register some players to categories
+  // Build registrations from configs
   const registrationData: Array<{
     playerId: string;
     categoryId: string;
     status: string;
   }> = [];
 
-  for (const player of createdPlayers) {
-    // Each player registers for 1-3 random categories
-    const numCategories = faker.number.int({ min: 1, max: 3 });
-    const selectedCategories = faker.helpers.arrayElements(
-      categoryIds,
-      numCategories,
-    );
+  // Track which players have been used per category to avoid duplicates
+  let playerPool = [...createdPlayers];
 
-    for (const categoryId of selectedCategories) {
+  for (const config of registrationConfigs) {
+    const available = playerPool.slice(0, config.playerCount);
+    // Rotate the pool so different categories get different players
+    playerPool = [...playerPool.slice(config.playerCount), ...available];
+
+    for (const player of available) {
+      let status: string;
+      if (config.status === "mixed") {
+        status = Math.random() < 0.7 ? "confirmed" : "pending";
+      } else {
+        status = config.status;
+      }
       registrationData.push({
         playerId: player.id,
-        categoryId,
-        status: faker.helpers.arrayElement(["confirmed", "confirmed", "pending"]),
+        categoryId: config.categoryId,
+        status,
       });
     }
   }
@@ -60,4 +76,16 @@ export async function seedPlayers(
   }
 
   return createdPlayers;
+}
+
+/**
+ * Get player IDs registered for a specific category (confirmed only).
+ */
+export function getRegisteredPlayerIds(
+  allRegistrations: Array<{ playerId: string; categoryId: string; status: string }>,
+  categoryId: string,
+): string[] {
+  return allRegistrations
+    .filter((r) => r.categoryId === categoryId && r.status === "confirmed")
+    .map((r) => r.playerId);
 }

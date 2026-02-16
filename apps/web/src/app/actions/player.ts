@@ -22,7 +22,7 @@ export async function upsertPlayerProfileAction(
     licenseNumber: string | null;
   },
 ): Promise<ActionResult<{ id: string }>> {
-  const session = await requireSession();
+  const user = await requireSession();
 
   if (!formData.firstName.trim() || !formData.lastName.trim()) {
     return { success: false, error: "First name and last name are required" };
@@ -33,7 +33,7 @@ export async function upsertPlayerProfileAction(
   }
 
   const [player] = await upsertPlayer(db, {
-    userId: session.user.id,
+    userId: user.id,
     firstName: formData.firstName.trim(),
     lastName: formData.lastName.trim(),
     birthDate: new Date(formData.birthDate),
@@ -59,9 +59,9 @@ export async function getPlayerProfileAction(): Promise<
     licenseNumber: string | null;
   } | null>
 > {
-  const session = await requireSession();
+  const user = await requireSession();
 
-  const player = await getPlayerByUserId(db, session.user.id);
+  const player = await getPlayerByUserId(db, user.id);
 
   if (!player) {
     return { success: true, data: null };
