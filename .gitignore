@@ -13,6 +13,9 @@ node_modules
 logs
 *.log
 
+# AI-generated documentation
+Doc/
+
 # Misc
 .DS_Store
 .fleet

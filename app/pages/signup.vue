@@ -2,12 +2,27 @@
 definePageMeta({ layout: 'default' })
 
 const { email, password, confirmPassword, getError, showError, handleSubmit } = useAuthForm('signup')
-const submitted = ref(false)
+const { fetch: fetchSession } = useUserSession()
+const loading = ref(false)
+const errorMessage = ref('')
 
-function onSubmit() {
-  handleSubmit((payload) => {
-    submitted.value = true
-    console.info('Signup (front)', payload)
+async function onSubmit() {
+  errorMessage.value = ''
+  handleSubmit(async (payload) => {
+    loading.value = true
+    try {
+      await $fetch('/api/auth/register', {
+        method: 'POST',
+        body: payload
+      })
+      await fetchSession()
+      await navigateTo('/')
+    } catch (e: unknown) {
+      const err = e as { data?: { message?: string } }
+      errorMessage.value = err?.data?.message ?? 'Une erreur est survenue.'
+    } finally {
+      loading.value = false
+    }
   })
 }
 </script>
@@ -25,7 +40,10 @@ function onSubmit() {
           </p>
         </template>
 
-        <form class="space-y-4" @submit.prevent="onSubmit">
+        <form
+          class="space-y-4"
+          @submit.prevent="onSubmit"
+        >
           <UFormField
             label="Email"
             required
@@ -72,23 +90,35 @@ function onSubmit() {
           </UFormField>
 
           <div class="flex flex-col gap-3 pt-2">
-            <UButton type="submit" block size="lg">
+            <UButton
+              type="submit"
+              block
+              size="lg"
+              :loading="loading"
+              :disabled="loading"
+            >
               S'inscrire
             </UButton>
             <p class="text-center text-sm text-muted">
               Déjà un compte ?
-              <ULink to="/signin" class="text-primary hover:underline">
+              <ULink
+                to="/signin"
+                class="text-primary hover:underline"
+              >
                 Se connecter
               </ULink>
             </p>
           </div>
         </form>
 
-        <template v-if="submitted" #footer>
+        <template
+          v-if="errorMessage"
+          #footer
+        >
           <UAlert
-            color="success"
-            title="Formulaire envoyé"
-            description="En production, une requête d'inscription serait envoyée."
+            color="error"
+            title="Erreur"
+            :description="errorMessage"
           />
         </template>
       </UCard>

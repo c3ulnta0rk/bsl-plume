@@ -8,7 +8,7 @@ export default defineAppConfig({
       variants: {
         required: {
           true: {
-            label: "after:content-['*'] after:ms-0.5 after:text-muted"
+            label: 'after:content-[\'*\'] after:ms-0.5 after:text-muted'
           }
         }
       }

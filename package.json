@@ -14,13 +14,17 @@
     "test:nuxt": "vitest --project nuxt"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.3.15",
     "@iconify-json/lucide": "^1.2.90",
     "@iconify-json/simple-icons": "^1.2.70",
-    "@logto/nuxt": "1.2.8",
     "@nuxt/ui": "^4.4.0",
     "@nuxthub/core": "0.10.6",
     "@pinia/nuxt": "0.11.3",
+    "drizzle-kit": "^0.31.9",
+    "drizzle-orm": "^0.45.1",
     "nuxt": "^4.3.1",
+    "nuxt-auth-utils": "^0.5.29",
+    "postgres": "^3.4.8",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

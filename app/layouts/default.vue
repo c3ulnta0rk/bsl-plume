@@ -1,3 +1,19 @@
+<script setup lang="ts">
+const { loggedIn, user, clear } = useUserSession()
+const loggingOut = ref(false)
+
+async function logout() {
+  loggingOut.value = true
+  try {
+    await $fetch('/api/auth/logout', { method: 'POST' })
+    await clear()
+    await navigateTo('/')
+  } finally {
+    loggingOut.value = false
+  }
+}
+</script>
+
 <template>
   <div class="min-h-screen flex flex-col">
     <header class="border-b border-default">
@@ -15,19 +31,33 @@
           >
             Accueil
           </ULink>
-          <ULink
-            to="/signin"
-            variant="ghost"
-            size="sm"
-          >
-            Connexion
-          </ULink>
-          <UButton
-            to="/signup"
-            size="sm"
-          >
-            Inscription
-          </UButton>
+          <template v-if="loggedIn">
+            <span class="text-sm text-muted">{{ user?.email }}</span>
+            <UButton
+              variant="ghost"
+              size="sm"
+              :loading="loggingOut"
+              :disabled="loggingOut"
+              @click="logout"
+            >
+              Déconnexion
+            </UButton>
+          </template>
+          <template v-else>
+            <ULink
+              to="/signin"
+              variant="ghost"
+              size="sm"
+            >
+              Connexion
+            </ULink>
+            <UButton
+              to="/signup"
+              size="sm"
+            >
+              Inscription
+            </UButton>
+          </template>
         </nav>
       </UContainer>
     </header>

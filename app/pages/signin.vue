@@ -2,13 +2,27 @@
 definePageMeta({ layout: 'default' })
 
 const { email, password, getError, showError, handleSubmit } = useAuthForm('signin')
-const submitted = ref(false)
+const { fetch: fetchSession } = useUserSession()
+const loading = ref(false)
+const errorMessage = ref('')
 
-function onSubmit() {
-  handleSubmit((payload) => {
-    submitted.value = true
-    // Front-only: just log or show toast; no API call
-    console.info('Signin (front)', payload)
+async function onSubmit() {
+  errorMessage.value = ''
+  handleSubmit(async (payload) => {
+    loading.value = true
+    try {
+      await $fetch('/api/auth/login', {
+        method: 'POST',
+        body: payload
+      })
+      await fetchSession()
+      await navigateTo('/')
+    } catch (e: unknown) {
+      const err = e as { data?: { message?: string }, statusCode?: number }
+      errorMessage.value = err?.data?.message ?? 'Une erreur est survenue.'
+    } finally {
+      loading.value = false
+    }
   })
 }
 </script>
@@ -66,6 +80,8 @@ function onSubmit() {
               type="submit"
               block
               size="lg"
+              :loading="loading"
+              :disabled="loading"
             >
               Se connecter
             </UButton>
@@ -82,13 +98,13 @@ function onSubmit() {
         </form>
 
         <template
-          v-if="submitted"
+          v-if="errorMessage"
           #footer
         >
           <UAlert
-            color="success"
-            title="Formulaire envoyé"
-            description="En production, une requête d'authentification serait envoyée."
+            color="error"
+            title="Erreur"
+            :description="errorMessage"
           />
         </template>
       </UCard>

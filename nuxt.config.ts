@@ -5,7 +5,7 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@pinia/nuxt',
-    '@logto/nuxt',
+    'nuxt-auth-utils',
     '@nuxthub/core'
   ],
 
@@ -19,11 +19,6 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      logto: {
-        appId: process.env.LOGTO_APP_ID,
-        appSecret: process.env.LOGTO_APP_SECRET,
-        baseUrl: process.env.LOGTO_BASE_URL
-      },
       apiBase: '/api'
     }
   },
@@ -33,6 +28,16 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2025-01-15',
+
+  hub: {
+    db: {
+      dialect: 'postgresql',
+      connection: {
+        connectionString: process.env.DATABASE_URL
+      },
+      casing: 'snake_case'
+    }
+  },
 
   eslint: {
     config: {
