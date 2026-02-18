@@ -1,6 +1,6 @@
 import { db } from '@nuxthub/db'
 import { eq } from 'drizzle-orm'
-import { users } from '../db/schema'
+import { users } from '../db/schema/users'
 
 export async function getUserByEmail(email: string) {
   const normalized = email.trim().toLowerCase()
