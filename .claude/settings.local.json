@@ -89,7 +89,20 @@
       "Bash(do echo -n \"$id: \")",
       "Bash(done)",
       "mcp__chrome-devtools__evaluate_script",
-      "mcp__chrome-devtools__new_page"
+      "mcp__chrome-devtools__new_page",
+      "Bash(xargs:*)",
+      "Bash(bun add:*)",
+      "Bash(bun run test:unit:*)",
+      "Bash(PGPASSWORD=example psql:*)",
+      "Bash(/tmp/test-adonis.mts << 'EOF'\nimport { Scrypt } from '@adonisjs/hash/drivers/scrypt'\nconst scrypt = new Scrypt\\({}\\)\nconst hash = await scrypt.make\\('password123'\\)\nconsole.log\\('Adonis scrypt hash:', hash\\)\n\n// Now try to verify the seed hash\nconst seedHash = '$scrypt$n=16384,r=8,p=1$vYTUsFPoKr7hADoQVDrE2g==$OFdR+iywyXpYUiktcQd7rjyx7hGqnSLpFridyCLyWP7nGuD/5WSv8jddodg9XBeZ5NMixfTHg1LALDzHwvkKpw=='\ntry {\n  const valid = await scrypt.verify\\(seedHash, 'password123'\\)\n  console.log\\('Adonis verify seed hash:', valid\\)\n} catch\\(e: unknown\\) {\n  console.log\\('Adonis verify error:', \\(e as Error\\).message\\)\n}\nEOF)",
+      "Bash(/tmp/test-adonis.mts << 'EOF'\nimport { Scrypt } from '@adonisjs/hash/drivers/scrypt'\nconst scrypt = new Scrypt\\({}\\)\nconst hash = await scrypt.make\\('password123'\\)\nconsole.log\\('Adonis scrypt hash:', hash\\)\n\nconst seedHash = '$scrypt$n=16384,r=8,p=1$vYTUsFPoKr7hADoQVDrE2g==$OFdR+iywyXpYUiktcQd7rjyx7hGqnSLpFridyCLyWP7nGuD/5WSv8jddodg9XBeZ5NMixfTHg1LALDzHwvkKpw=='\ntry {\n  const valid = await scrypt.verify\\(seedHash, 'password123'\\)\n  console.log\\('Adonis verify seed hash:', valid\\)\n} catch\\(e: unknown\\) {\n  console.log\\('Adonis verify error:', \\(e as Error\\).message\\)\n}\nEOF)",
+      "Bash(docker ps:*)",
+      "Bash(docker compose:*)",
+      "Bash(docker rm:*)",
+      "mcp__database__db_list_databases",
+      "Bash(docker exec:*)",
+      "Bash(docker port:*)",
+      "Bash(docker network ls:*)"
     ],
     "deny": [
       "Bash(git push *)",

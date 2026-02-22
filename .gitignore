@@ -30,3 +30,6 @@ Doc/
 bun.lockb
 bun.lock
 
+
+# Local DB dumps
+pg-dev_dumpall_*.sql.gz

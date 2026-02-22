@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core"
-import { clubs } from "./clubs";
+import { pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import { clubs } from './clubs'
 
 export const tournaments = pgTable('tournaments', {
   id: text('id').primaryKey(),
@@ -8,8 +8,8 @@ export const tournaments = pgTable('tournaments', {
   date: timestamp('date'),
   location: text('location'),
   status: text('status').notNull().default('draft'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-});
+  createdAt: timestamp('created_at').notNull().defaultNow()
+})
 
 // Inferred types (optional, for use in server code)
 export type Tournament = typeof tournaments.$inferSelect

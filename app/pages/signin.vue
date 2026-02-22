@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'default' })
 
+const { t } = useI18n()
 const { email, password, getError, showError, handleSubmit } = useAuthForm('signin')
 const { fetch: fetchSession } = useUserSession()
 const loading = ref(false)
@@ -16,10 +17,10 @@ async function onSubmit() {
         body: payload
       })
       await fetchSession()
-      await navigateTo('/')
+      await navigateTo('/admin')
     } catch (e: unknown) {
       const err = e as { data?: { message?: string }, statusCode?: number }
-      errorMessage.value = err?.data?.message ?? 'Une erreur est survenue.'
+      errorMessage.value = err?.data?.message ?? t('auth.genericError')
     } finally {
       loading.value = false
     }
@@ -33,10 +34,10 @@ async function onSubmit() {
       <UCard>
         <template #header>
           <h2 class="text-xl font-semibold text-highlighted">
-            Connexion
+            {{ t('auth.loginTitle') }}
           </h2>
           <p class="text-sm text-muted mt-1">
-            Entrez vos identifiants pour vous connecter.
+            {{ t('auth.loginSubtitle') }}
           </p>
         </template>
 
@@ -45,7 +46,7 @@ async function onSubmit() {
           @submit.prevent="onSubmit"
         >
           <UFormField
-            label="Email"
+            :label="t('auth.emailLabel')"
             required
             :error="getError('email') || undefined"
           >
@@ -53,7 +54,7 @@ async function onSubmit() {
               v-model="email"
               variant="subtle"
               type="email"
-              placeholder="vous@exemple.fr"
+              :placeholder="t('auth.emailPlaceholder')"
               class="w-full"
               autocomplete="email"
               @blur="showError('email')"
@@ -61,14 +62,14 @@ async function onSubmit() {
           </UFormField>
 
           <UFormField
-            label="Mot de passe"
+            :label="t('auth.passwordLabel')"
             required
             :error="getError('password') || undefined"
           >
             <UInput
               v-model="password"
               type="password"
-              placeholder="••••••••"
+              :placeholder="t('auth.passwordPlaceholder')"
               class="w-full"
               autocomplete="current-password"
               @blur="showError('password')"
@@ -83,15 +84,15 @@ async function onSubmit() {
               :loading="loading"
               :disabled="loading"
             >
-              Se connecter
+              {{ t('auth.submitLogin') }}
             </UButton>
             <p class="text-center text-sm text-muted">
-              Pas encore de compte ?
+              {{ t('auth.noAccount') }}
               <ULink
                 to="/signup"
                 class="text-primary hover:underline"
               >
-                S'inscrire
+                {{ t('auth.register') }}
               </ULink>
             </p>
           </div>
@@ -103,7 +104,7 @@ async function onSubmit() {
         >
           <UAlert
             color="error"
-            title="Erreur"
+            :title="t('auth.error')"
             :description="errorMessage"
           />
         </template>

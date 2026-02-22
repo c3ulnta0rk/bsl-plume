@@ -1,32 +1,31 @@
 {
-    "name": "Node-Bun-Postgres-Dev",
-    "dockerComposeFile": "docker-compose.yml",
-    "service": "app",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-    
-    "features": {
-      // On peut aussi ajouter Bun via une "feature" si on veut un Dockerfile plus léger
-      "ghcr.io/devcontainers/features/node:1": {
-        "version": "20"
+  "name": "BSL-Plume-Dev",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/bsl-app",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Oven.bun-vscode",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "vitest.explorer",
+        "ckotzbauer.vscode-pg-formatter"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
       }
-    },
-  
-    "customizations": {
-      "vscode": {
-        "extensions": [
-          "Oven.bun-vscode",
-          "esbenp.prettier-vscode",
-          "dbaeumer.vscode-eslint",
-          "vitest.explorer", // Très utile pour tes tests unitaires
-          "ckotzbauer.vscode-pg-formatter"
-        ],
-        "settings": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode",
-          "editor.formatOnSave": true
-        }
-      }
-    },
-  
-    "remoteUser": "node",
-    "postCreateCommand": "bun install"
-  }
+    }
+  },
+
+  "remoteUser": "node",
+  "postCreateCommand": "bun install"
+}

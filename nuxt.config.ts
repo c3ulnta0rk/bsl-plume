@@ -6,7 +6,8 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@pinia/nuxt',
     'nuxt-auth-utils',
-    '@nuxthub/core'
+    '@nuxthub/core',
+    '@nuxtjs/i18n'
   ],
 
   ssr: process.env.NODE_ENV === 'production',
@@ -23,9 +24,7 @@ export default defineNuxtConfig({
     }
   },
 
-  routeRules: {
-    '/': { prerender: true }
-  },
+  routeRules: {},
 
   compatibilityDate: '2025-01-15',
 
@@ -48,5 +47,14 @@ export default defineNuxtConfig({
         semi: false
       }
     }
+  },
+
+  i18n: {
+    locales: [
+      { code: 'fr', name: 'Français', file: 'fr.json' },
+      { code: 'en', name: 'English', file: 'en.json' }
+    ],
+    defaultLocale: 'fr',
+    strategy: 'no_prefix'
   }
 })

@@ -1,0 +1,260 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Cr\u00e9er",
+    "search": "Rechercher...",
+    "actions": "Actions",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "loading": "Chargement...",
+    "noResults": "Aucun r\u00e9sultat",
+    "yes": "Oui",
+    "no": "Non",
+    "name": "Nom",
+    "email": "Email",
+    "status": "Statut",
+    "date": "Date",
+    "role": "R\u00f4le",
+    "id": "ID",
+    "all": "Tous",
+    "clearFilters": "Effacer les filtres",
+    "view": "Voir",
+    "none": "Aucun",
+    "total": "Total"
+  },
+  "nav": {
+    "home": "Accueil",
+    "dashboard": "Tableau de bord",
+    "clubs": "Clubs",
+    "users": "Utilisateurs",
+    "tournaments": "Tournois",
+    "categoryTypes": "Types de cat\u00e9gories",
+    "categories": "Cat\u00e9gories",
+    "teams": "\u00c9quipes",
+    "matches": "Matchs",
+    "phases": "Phases",
+    "pools": "Poules",
+    "admin": "Administration"
+  },
+  "auth": {
+    "login": "Connexion",
+    "logout": "D\u00e9connexion",
+    "register": "Inscription",
+    "loginTitle": "Connexion",
+    "loginSubtitle": "Entrez vos identifiants pour vous connecter.",
+    "registerTitle": "Inscription",
+    "registerSubtitle": "Cr\u00e9ez un compte pour continuer.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous{'@'}exemple.fr",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "submitLogin": "Se connecter",
+    "submitRegister": "S'inscrire",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "D\u00e9j\u00e0 un compte ?",
+    "error": "Erreur",
+    "genericError": "Une erreur est survenue.",
+    "emailRequired": "L'email est requis",
+    "emailInvalid": "Email invalide",
+    "passwordRequired": "Le mot de passe est requis",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 8 caract\u00e8res",
+    "confirmPasswordRequired": "Veuillez confirmer le mot de passe",
+    "passwordMismatch": "Les mots de passe ne correspondent pas"
+  },
+  "home": {
+    "welcome": "Bienvenue",
+    "subtitle": "Plateforme de gestion de tournois de badminton.",
+    "welcomeUser": "Bienvenue, {email} !",
+    "upcomingTournaments": "Tournois \u00e0 venir",
+    "viewAll": "Voir tous les tournois"
+  },
+  "footer": {
+    "rights": "\u00a9 {year} \u2014 Tous droits r\u00e9serv\u00e9s"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "totalClubs": "Clubs",
+    "totalTournaments": "Tournois",
+    "totalUsers": "Utilisateurs",
+    "totalMatches": "Matchs",
+    "recentTournaments": "Derniers tournois",
+    "quickActions": "Actions rapides",
+    "createClub": "Nouveau club",
+    "createTournament": "Nouveau tournoi"
+  },
+  "clubs": {
+    "title": "Clubs",
+    "create": "Cr\u00e9er un club",
+    "edit": "Modifier le club",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer ce club ?",
+    "fields": {
+      "name": "Nom du club"
+    }
+  },
+  "users": {
+    "title": "Utilisateurs",
+    "edit": "Modifier l'utilisateur",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer cet utilisateur ?",
+    "fields": {
+      "name": "Nom",
+      "email": "Email",
+      "role": "R\u00f4le",
+      "club": "Club",
+      "licenseNumber": "N\u00b0 licence"
+    },
+    "roles": {
+      "admin": "Admin",
+      "user": "Utilisateur"
+    }
+  },
+  "tournaments": {
+    "title": "Tournois",
+    "create": "Cr\u00e9er un tournoi",
+    "edit": "Modifier le tournoi",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer ce tournoi ?",
+    "noTournaments": "Aucun tournoi publi\u00e9 pour le moment.",
+    "viewDetails": "Voir le d\u00e9tail",
+    "fields": {
+      "name": "Nom",
+      "club": "Club",
+      "date": "Date",
+      "location": "Lieu",
+      "status": "Statut"
+    },
+    "statuses": {
+      "draft": "Brouillon",
+      "published": "Publi\u00e9",
+      "archived": "Archiv\u00e9"
+    },
+    "tabs": {
+      "info": "Informations",
+      "categories": "Cat\u00e9gories",
+      "teams": "\u00c9quipes"
+    },
+    "viewBracket": "Voir le tournoi"
+  },
+  "categoryTypes": {
+    "title": "Types de cat\u00e9gories",
+    "create": "Cr\u00e9er un type",
+    "edit": "Modifier le type",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer ce type ?",
+    "fields": {
+      "name": "Nom",
+      "type": "Type",
+      "gender": "Genre"
+    },
+    "types": {
+      "singles": "Simple",
+      "doubles": "Double",
+      "mixed": "Mixte"
+    },
+    "genders": {
+      "M": "Homme",
+      "F": "Femme",
+      "mixed": "Mixte"
+    }
+  },
+  "categories": {
+    "title": "Cat\u00e9gories",
+    "create": "Ajouter une cat\u00e9gorie",
+    "edit": "Modifier la cat\u00e9gorie",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer cette cat\u00e9gorie ?",
+    "noCategories": "Aucune cat\u00e9gorie pour ce tournoi.",
+    "fields": {
+      "type": "Type",
+      "maxTeams": "\u00c9quipes max",
+      "status": "Statut"
+    },
+    "tabs": {
+      "teams": "\u00c9quipes",
+      "phases": "Phases"
+    }
+  },
+  "teams": {
+    "title": "\u00c9quipes",
+    "create": "Cr\u00e9er une \u00e9quipe",
+    "edit": "Modifier l'\u00e9quipe",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer cette \u00e9quipe ?",
+    "fields": {
+      "name": "Nom",
+      "playerOne": "Joueur 1",
+      "playerTwo": "Joueur 2",
+      "tournament": "Tournoi",
+      "category": "Cat\u00e9gorie",
+      "seed": "T\u00eate de s\u00e9rie"
+    }
+  },
+  "phases": {
+    "title": "Phases",
+    "create": "Cr\u00e9er une phase",
+    "edit": "Modifier la phase",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer cette phase ?",
+    "noPhases": "Aucune phase configur\u00e9e pour cette cat\u00e9gorie.",
+    "noPools": "Aucune poule g\u00e9n\u00e9r\u00e9e.",
+    "fields": {
+      "name": "Nom",
+      "type": "Type",
+      "order": "Ordre",
+      "status": "Statut"
+    },
+    "phaseTypes": {
+      "pool": "Poules",
+      "knockout": "\u00c9limination directe"
+    }
+  },
+  "pools": {
+    "title": "Poules",
+    "pool": "Poule {name}",
+    "create": "Cr\u00e9er une poule",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer cette poule ?",
+    "fields": {
+      "name": "Nom"
+    },
+    "entries": "Inscriptions",
+    "addEntry": "Ajouter une \u00e9quipe"
+  },
+  "matches": {
+    "title": "Matchs",
+    "create": "Cr\u00e9er un match",
+    "edit": "Modifier le match",
+    "editMatch": "Modifier le match",
+    "deleteConfirm": "\u00cates-vous s\u00fbr de vouloir supprimer ce match ?",
+    "noKnockoutMatches": "Pas de matchs d'\u00e9limination.",
+    "totalMatches": "{n} matchs au total",
+    "wins": "V",
+    "team": "\u00c9quipe",
+    "tbd": "\u00c0 d\u00e9terminer",
+    "saving": "Enregistrement...",
+    "fields": {
+      "team1": "\u00c9quipe 1",
+      "team2": "\u00c9quipe 2",
+      "winner": "Vainqueur",
+      "status": "Statut",
+      "court": "Terrain",
+      "scheduledAt": "Heure pr\u00e9vue",
+      "round": "Tour",
+      "score": "Score"
+    },
+    "statuses": {
+      "pending": "En attente",
+      "in_progress": "En cours",
+      "completed": "Termin\u00e9"
+    },
+    "roundLabels": {
+      "final": "Finale",
+      "semiFinal": "Demi-finales",
+      "quarterFinal": "Quarts de finale",
+      "round": "Tour {n}"
+    }
+  },
+  "sets": {
+    "title": "Sets",
+    "addSet": "Ajouter un set",
+    "set": "Set {n}",
+    "removeSet": "Supprimer le set"
+  }
+}

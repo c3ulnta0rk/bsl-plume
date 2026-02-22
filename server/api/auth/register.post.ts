@@ -1,8 +1,9 @@
 import { createUser } from '../../utils/users'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ email?: string, password?: string }>(event)
+  const body = await readBody<{ email?: string, password?: string, name?: string }>(event)
   const email = body?.email?.trim()
+  const name = body?.name?.trim() || 'Utilisateur' // Valeur par défaut si le nom n'est pas fourni
   const password = body?.password
 
   if (!email || !password) {
@@ -21,9 +22,9 @@ export default defineEventHandler(async (event) => {
 
   try {
     const passwordHash = await hashPassword(password)
-    const user = await createUser(email, passwordHash)
+    const user = await createUser(email, name, passwordHash)
     await setUserSession(event, {
-      user: { id: user.id, email: user.email },
+      user: { id: user.id, email: user.email, role: 'user' },
       loggedInAt: new Date()
     })
     return { success: true }

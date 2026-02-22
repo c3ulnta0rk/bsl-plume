@@ -1,7 +1,7 @@
-import { integer, pgTable, text, timestamp, type AnyPgColumn } from "drizzle-orm/pg-core";
-import { phases } from "./rounds";
-import { teams } from "./teams";
-import { pools } from "./pools";
+import { integer, pgTable, text, timestamp, type AnyPgColumn } from 'drizzle-orm/pg-core'
+import { phases } from './rounds'
+import { teams } from './teams'
+import { pools } from './pools'
 
 export const matches = pgTable('matches', {
   id: text('id').primaryKey(),
@@ -17,9 +17,8 @@ export const matches = pgTable('matches', {
   nextMatchSlot: integer('next_match_slot'),
   status: text('status').notNull().default('pending'),
   court: text('court'),
-  scheduledAt: timestamp('scheduled_at'),
-});
-
+  scheduledAt: timestamp('scheduled_at')
+})
 
 // Inferred types (optional, for use in server code)
 export type Match = typeof matches.$inferSelect

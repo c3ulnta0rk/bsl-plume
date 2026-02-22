@@ -1,5 +1,7 @@
 <script setup lang="ts">
+const { t } = useI18n()
 const { loggedIn, user, clear } = useUserSession()
+const { isAdmin } = useAdminAuth()
 const loggingOut = ref(false)
 
 async function logout() {
@@ -29,9 +31,22 @@ async function logout() {
             to="/"
             class="text-muted hover:text-default transition-colors"
           >
-            Accueil
+            {{ t('nav.home') }}
+          </ULink>
+          <ULink
+            to="/tournaments"
+            class="text-muted hover:text-default transition-colors"
+          >
+            {{ t('nav.tournaments') }}
           </ULink>
           <template v-if="loggedIn">
+            <ULink
+              v-if="isAdmin"
+              to="/admin"
+              class="text-muted hover:text-default transition-colors"
+            >
+              {{ t('nav.admin') }}
+            </ULink>
             <span class="text-sm text-muted">{{ user?.email }}</span>
             <UButton
               variant="ghost"
@@ -40,7 +55,7 @@ async function logout() {
               :disabled="loggingOut"
               @click="logout"
             >
-              Déconnexion
+              {{ t('auth.logout') }}
             </UButton>
           </template>
           <template v-else>
@@ -49,13 +64,13 @@ async function logout() {
               variant="ghost"
               size="sm"
             >
-              Connexion
+              {{ t('auth.login') }}
             </ULink>
             <UButton
               to="/signup"
               size="sm"
             >
-              Inscription
+              {{ t('auth.register') }}
             </UButton>
           </template>
         </nav>
@@ -66,7 +81,7 @@ async function logout() {
     </main>
     <footer class="border-t border-default py-6 text-center text-sm text-muted">
       <UContainer>
-        &copy; {{ new Date().getFullYear() }} — Tous droits réservés
+        {{ t('footer.rights', { year: new Date().getFullYear() }) }}
       </UContainer>
     </footer>
   </div>

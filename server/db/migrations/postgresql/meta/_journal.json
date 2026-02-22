@@ -8,6 +8,20 @@
       "when": 1771440123764,
       "tag": "0000_secret_trish_tilby",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771450041775,
+      "tag": "0001_mute_karma",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771513707602,
+      "tag": "0002_melted_proteus",
+      "breakpoints": true
     }
   ]
 }
