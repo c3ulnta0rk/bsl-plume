@@ -1,35 +1,12 @@
-# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
-
-# Node dependencies
 node_modules
-
-# Logs
-logs
-*.log
-
-# AI-generated documentation
-Doc/
-
-# Misc
-.DS_Store
-.fleet
-.idea
-
-# Local env files
+dist
+.expo
+.data
 .env
 .env.*
 !.env.example
-
-# Bun files
-bun.lockb
-bun.lock
-
-
-# Local DB dumps
-pg-dev_dumpall_*.sql.gz
+*.log
+.DS_Store
+apps/app/ios
+apps/app/android
+web-build

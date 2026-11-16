@@ -1,44 +1,16 @@
 {
-  "name": "bsl-app",
+  "name": "bsl-plume",
   "private": true,
-  "type": "module",
+  "version": "2.0.0",
+  "workspaces": ["packages/*", "apps/*"],
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "typecheck": "nuxt typecheck",
-    "test": "vitest",
-    "test:unit": "vitest --project unit",
-    "test:nuxt": "vitest --project nuxt"
+    "dev": "npm run dev --workspace @plume/server",
+    "dev:app": "npm run web --workspace @plume/app",
+    "test": "npm run test --workspace @plume/engine && npm run test --workspace @plume/server",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build:web": "npm run build:web --workspace @plume/app",
+    "start": "npm run start --workspace @plume/server",
+    "seed": "npm run seed --workspace @plume/server"
   },
-  "dependencies": {
-    "@electric-sql/pglite": "^0.3.15",
-    "@iconify-json/lucide": "^1.2.90",
-    "@iconify-json/simple-icons": "^1.2.70",
-    "@nuxt/ui": "^4.4.0",
-    "@nuxthub/core": "0.10.6",
-    "@nuxtjs/i18n": "^10.2.3",
-    "@pinia/nuxt": "0.11.3",
-    "drizzle-kit": "^0.31.9",
-    "drizzle-orm": "^0.45.1",
-    "nuxt": "^4.3.1",
-    "nuxt-auth-utils": "^0.5.29",
-    "postgres": "^3.4.8",
-    "tailwindcss": "^4.1.18"
-  },
-  "devDependencies": {
-    "@faker-js/faker": "^10.3.0",
-    "@nuxt/eslint": "^1.15.1",
-    "@nuxt/test-utils": "^3.14.0",
-    "@types/node": "^25.2.3",
-    "@vue/test-utils": "^2.4.6",
-    "eslint": "^10.0.0",
-    "happy-dom": "^15.11.7",
-    "sass-embedded": "^1.97.3",
-    "typescript": "^5.9.3",
-    "vitest": "^2.1.8",
-    "vue-tsc": "^3.2.4"
-  }
+  "engines": { "node": ">=22" }
 }

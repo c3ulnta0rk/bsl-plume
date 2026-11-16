@@ -1,0 +1,36 @@
+{
+  "name": "@plume/server",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "seed": "tsx src/seed.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@hono/node-server": "^1.19.0",
+    "@plume/engine": "*",
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.19",
+    "nodemailer": "^7.0.0",
+    "postgres": "^3.4.8",
+    "tsx": "^4.20.0",
+    "web-push": "^3.6.7",
+    "ws": "^8.18.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/nodemailer": "^7.0.0",
+    "@types/web-push": "^3.6.4",
+    "@types/ws": "^8.18.0",
+    "drizzle-kit": "^0.31.9",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}
