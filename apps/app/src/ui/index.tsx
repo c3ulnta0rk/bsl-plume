@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import type { ComponentProps, ReactNode } from 'react'
+import { createContext, useContext, type ComponentProps, type ReactNode } from 'react'
 import {
   ActivityIndicator, Animated, Modal, Platform, Pressable, RefreshControl, ScrollView, Text as RNText, TextInput, useWindowDimensions, View,
   type StyleProp, type TextInputProps, type TextStyle, type ViewStyle
@@ -72,8 +72,11 @@ function PressCard({ children, style, onPress, testID }: { children: ReactNode, 
   return <APressable testID={testID} accessibilityRole="button" onPress={onPress} onPressIn={p.onPressIn} onPressOut={p.onPressOut} style={[style, { transform: [{ scale: p.scale }] }]}>{children}</APressable>
 }
 
+/** Un champ ne se partage la largeur que s'il est posé dans une rangée. */
+const InRow = createContext(false)
+
 export function Row({ children, gap = space.sm, wrap, style, align = 'center', justify }: { children: ReactNode, gap?: number, wrap?: boolean, style?: StyleProp<ViewStyle>, align?: ViewStyle['alignItems'], justify?: ViewStyle['justifyContent'] }) {
-  return <View style={[{ flexDirection: 'row', alignItems: align, gap, flexWrap: wrap ? 'wrap' : 'nowrap', justifyContent: justify }, style]}>{children}</View>
+  return <InRow.Provider value><View style={[{ flexDirection: 'row', alignItems: align, gap, flexWrap: wrap ? 'wrap' : 'nowrap', justifyContent: justify }, style]}>{children}</View></InRow.Provider>
 }
 
 type ButtonKind = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent' | 'night'
@@ -152,8 +155,9 @@ export function Banner({ text, tone = 'info', icon, action }: { text: string, to
 
 export function Field({ label, error, hint, style, ...rest }: { label: string, error?: string | null, hint?: string } & TextInputProps) {
   const t = useTheme()
+  const inRow = useContext(InRow)
   return (
-    <View style={[{ gap: 6, flexGrow: 1, flexBasis: 220 }, style as StyleProp<ViewStyle>]}>
+    <View style={[{ gap: 6 }, inRow ? { flexGrow: 1, flexBasis: 220 } : null, style as StyleProp<ViewStyle>]}>
       <T v="small" style={{ fontWeight: '700' }}>{label}</T>
       <TextInput
         accessibilityLabel={label}
