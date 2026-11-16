@@ -6,14 +6,14 @@ import { useFollows } from '@/lib/data'
 import { dateFr } from '@/lib/format'
 import { useSession } from '@/lib/session'
 import type { TournamentCard } from '@/lib/types'
-import { Banner, Button, Card, Chip, Empty, font, Loading, Row, Screen, Section, space, T, useTheme, useWide } from '@/ui'
+import { Appear, Banner, Button, Card, Chip, Empty, font, Loading, Row, Screen, Section, space, stagger, T, useTheme, useWide } from '@/ui'
 
-function TournamentTile({ t: x }: { t: TournamentCard }) {
+function TournamentTile({ t: x, i = 0 }: { t: TournamentCard, i?: number }) {
   const t = useTheme()
   const router = useRouter()
   const live = x.status === 'running'
   return (
-    <Card testID={`tournament-${x.slug}`} onPress={() => router.push(`/t/${x.slug}` as never)} pad={0} style={{ overflow: 'hidden', flexGrow: 1, flexBasis: 320 }}>
+    <Appear delay={stagger(i, 70)} style={{ flexGrow: 1, flexBasis: 320 }}><Card testID={`tournament-${x.slug}`} onPress={() => router.push(`/t/${x.slug}` as never)} pad={0} style={{ overflow: 'hidden', flex: 1 }}>
       <View style={{ backgroundColor: live ? t.night : t.surface, padding: space.lg, gap: 6 }}>
         <Row wrap>
           {live ? <Chip label="En direct" tone="live" icon="radio-button-on" /> : x.status === 'finished' ? <Chip label="Terminé" /> : <Chip label={x.registrationOpen ? 'Inscriptions ouvertes' : 'Inscriptions closes'} tone={x.registrationOpen ? 'success' : 'neutral'} />}
@@ -26,7 +26,7 @@ function TournamentTile({ t: x }: { t: TournamentCard }) {
         <T v="small" color={t.ink2}><T v="h3">{x.categories}</T> tableaux</T>
         <T v="small" color={t.ink2}><T v="h3">{x.entries}</T> / {x.places} inscrits</T>
       </Row>
-    </Card>
+    </Card></Appear>
   )
 }
 
@@ -65,13 +65,13 @@ export default function Home() {
             </Section>
           )
         : null}
-      {running.length > 0 ? <Section title="En ce moment"><Row wrap gap={space.lg} align="stretch">{running.map(x => <TournamentTile key={x.id} t={x} />)}</Row></Section> : null}
+      {running.length > 0 ? <Section title="En ce moment"><Row wrap gap={space.lg} align="stretch">{running.map((x, i) => <TournamentTile key={x.id} t={x} i={i} />)}</Row></Section> : null}
       <Section title="À venir">
         {upcoming.length === 0
           ? <Empty icon="calendar-outline" title="Aucun tournoi à venir" text="Les prochains tournois publiés apparaîtront ici." />
-          : <Row wrap gap={space.lg} align="stretch">{upcoming.map(x => <TournamentTile key={x.id} t={x} />)}</Row>}
+          : <Row wrap gap={space.lg} align="stretch">{upcoming.map((x, i) => <TournamentTile key={x.id} t={x} i={i + 1} />)}</Row>}
       </Section>
-      {past.length > 0 ? <Section title="Terminés"><Row wrap gap={space.lg} align="stretch">{past.map(x => <TournamentTile key={x.id} t={x} />)}</Row></Section> : null}
+      {past.length > 0 ? <Section title="Terminés"><Row wrap gap={space.lg} align="stretch">{past.map((x, i) => <TournamentTile key={x.id} t={x} i={i + 2} />)}</Row></Section> : null}
     </Screen>
   )
 }

@@ -6,7 +6,7 @@ import { matchStatus, ScoreBoard, sideName } from '@/features/match'
 import { ActionError, useAction } from '@/features/orga'
 import { useTournament } from '@/features/tournament'
 import { post } from '@/lib/api'
-import { Banner, Button, Card, Chip, Choice, font, radius, Row, Screen, Section, space, T, useTheme, useWide } from '@/ui'
+import { Banner, Button, Card, Chip, Choice, font, Pop, radius, Row, Screen, Section, space, T, useTheme, useWide } from '@/ui'
 
 type S = { a: number, b: number }
 
@@ -74,7 +74,7 @@ export default function ScoreSheet() {
       onPress={() => point(side)}
       style={({ pressed }) => ({ flex: 1, minHeight: wide ? 150 : 120, borderRadius: radius.lg, backgroundColor: pressed ? t.action : t.night, alignItems: 'center', justifyContent: 'center', padding: space.md, gap: 4, opacity: act.busy ? 0.7 : 1 })}
     >
-      <Text style={{ fontFamily: font.display, fontSize: 54, lineHeight: 56, color: t.volant }}>+1</Text>
+      <Pop watch={(side === 1 ? m.sets.at(-1)?.a : m.sets.at(-1)?.b) ?? 0} scale={1.5}><Text style={{ fontFamily: font.display, fontSize: 54, lineHeight: 56, color: t.volant }}>+1</Text></Pop>
       <Text numberOfLines={2} style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 16, textAlign: 'center' }}>{name}</Text>
     </Pressable>
   )

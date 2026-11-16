@@ -61,3 +61,7 @@ L'état public d'un tournoi ne contient ni adresse mail ni téléphone. Les coor
 - **Hono + Drizzle + PostgreSQL** : serveur léger, auto-hébergeable sur une petite machine.
 - **PGlite** en développement et en mode salle : même schéma et mêmes requêtes que PostgreSQL, sans rien installer.
 - **Pas de bibliothèque de style** : un thème et une vingtaine de composants maison (`apps/app/src/ui`), pour garder la main sur la lisibilité.
+
+## Animations
+
+Tout passe par `apps/app/src/ui/motion.tsx`, bâti sur l'API `Animated` de React Native pour rester identique sur le web, Android et iOS sans dépendance native : `Appear` (apparition, avec `stagger` pour les cascades), `Pop` (rebond quand une valeur change : point marqué, rang, statut), `Pulse` et `Halo` (réservés au direct et à l'appel d'un match), `Bar`, `CountUp`, `usePress`. Les personnes qui ont demandé moins d'animations dans leur système n'en voient aucune.

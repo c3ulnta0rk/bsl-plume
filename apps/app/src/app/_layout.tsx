@@ -28,7 +28,7 @@ export default function RootLayout() {
           <StatusBar style="light" />
           <View style={{ flex: 1, backgroundColor: t.bg }}>
             <AppBar />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg }, animation: 'fade' }} />
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: t.bg }, animation: 'default' }} />
           </View>
         </SessionProvider>
       </QueryClientProvider>

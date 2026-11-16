@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { hhmm } from '@/lib/format'
 import type { Category, Match } from '@/lib/types'
-import { font, radius, T, useTheme } from '@/ui'
+import { Appear, font, radius, T, useTheme } from '@/ui'
 import { sideName, type MatchContext } from './match'
 
 const CARD_H = 92
@@ -67,7 +67,7 @@ export function BracketView({ category, matches, ctx, onPress }: { category: Cat
           const count = firstCount / 2 ** ri
           const slot = height / count
           return (
-            <View key={r.round} style={{ width: COL_W + (ri < rounds.length - 1 ? 28 : 0) }}>
+            <Appear key={r.round} delay={ri * 120} axis="x" from={20} style={{ width: COL_W + (ri < rounds.length - 1 ? 28 : 0) }}>
               <Text style={{ fontFamily: font.display, fontSize: 20, color: t.ink, marginBottom: 8, letterSpacing: 0.3 }}>{r.name}</Text>
               <View style={{ height }}>
                 {Array.from({ length: count }, (_, i) => {
@@ -97,7 +97,7 @@ export function BracketView({ category, matches, ctx, onPress }: { category: Cat
                     </View>
                   )
                 : null}
-            </View>
+            </Appear>
           )
         })}
       </View>

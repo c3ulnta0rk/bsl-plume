@@ -1,13 +1,17 @@
 import { Ionicons } from '@expo/vector-icons'
 import type { ComponentProps, ReactNode } from 'react'
 import {
-  ActivityIndicator, Modal, Platform, Pressable, RefreshControl, ScrollView, Text as RNText, TextInput, useWindowDimensions, View,
+  ActivityIndicator, Animated, Modal, Platform, Pressable, RefreshControl, ScrollView, Text as RNText, TextInput, useWindowDimensions, View,
   type StyleProp, type TextInputProps, type TextStyle, type ViewStyle
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Appear, Pulse, usePress, useToggle } from './motion'
 import { font, radius, space, useTheme, type Theme } from './theme'
 
 export { font, radius, space, useTheme } from './theme'
+export * from './motion'
+
+const APressable = Animated.createAnimatedComponent(Pressable)
 export type IconName = ComponentProps<typeof Ionicons>['name']
 
 /** Écran large : mise en page à plusieurs colonnes, vues condensées par défaut. */
@@ -49,7 +53,7 @@ export function Screen({ children, maxWidth = 1120, onRefresh, refreshing, padde
         contentContainerStyle={{ paddingBottom: insets.bottom + space.xxl + (footer ? 72 : 0) }}
         refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={t.action} /> : undefined}
       >
-        <View style={{ width: '100%', maxWidth, alignSelf: 'center', padding: padded ? space.lg : 0, gap: space.lg }}>{children}</View>
+        <Appear from={18} style={{ width: '100%', maxWidth, alignSelf: 'center', padding: padded ? space.lg : 0, gap: space.lg }}>{children}</Appear>
       </ScrollView>
       {footer}
     </View>
@@ -59,10 +63,13 @@ export function Screen({ children, maxWidth = 1120, onRefresh, refreshing, padde
 export function Card({ children, style, pad = space.lg, onPress, testID }: { children: ReactNode, style?: StyleProp<ViewStyle>, pad?: number, onPress?: () => void, testID?: string }) {
   const t = useTheme()
   const s: StyleProp<ViewStyle> = [{ backgroundColor: t.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: t.line, padding: pad }, style]
-  if (onPress) {
-    return <Pressable testID={testID} accessibilityRole="button" onPress={onPress} style={({ pressed }) => [s, pressed && { opacity: 0.85 }]}>{children}</Pressable>
-  }
+  if (onPress) return <PressCard testID={testID} onPress={onPress} style={s}>{children}</PressCard>
   return <View testID={testID} style={s}>{children}</View>
+}
+
+function PressCard({ children, style, onPress, testID }: { children: ReactNode, style: StyleProp<ViewStyle>, onPress: () => void, testID?: string }) {
+  const p = usePress(0.98)
+  return <APressable testID={testID} accessibilityRole="button" onPress={onPress} onPressIn={p.onPressIn} onPressOut={p.onPressOut} style={[style, { transform: [{ scale: p.scale }] }]}>{children}</APressable>
 }
 
 export function Row({ children, gap = space.sm, wrap, style, align = 'center', justify }: { children: ReactNode, gap?: number, wrap?: boolean, style?: StyleProp<ViewStyle>, align?: ViewStyle['alignItems'], justify?: ViewStyle['justifyContent'] }) {
@@ -84,22 +91,25 @@ export function Button({ label, onPress, kind = 'primary', icon, size = 'md', di
   }
   const k = c[kind]
   const h = size === 'lg' ? 54 : size === 'sm' ? 36 : 46
+  const p = usePress()
   return (
-    <Pressable
+    <APressable
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled: !!disabled || !!loading }}
       disabled={disabled || loading}
       onPress={onPress}
-      style={({ pressed }) => [{
+      onPressIn={p.onPressIn}
+      onPressOut={p.onPressOut}
+      style={[{
         minHeight: h, paddingHorizontal: size === 'sm' ? 12 : 18, borderRadius: radius.md, backgroundColor: k.bg, borderWidth: k.border ? 1 : 0, borderColor: k.border,
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: disabled ? 0.45 : pressed ? 0.8 : 1, alignSelf: full ? 'stretch' : 'flex-start'
-      }, style]}
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: disabled ? 0.45 : 1, alignSelf: full ? 'stretch' : 'flex-start'
+      }, style, { transform: [{ scale: p.scale }] }]}
     >
       {loading ? <ActivityIndicator color={k.fg} /> : icon ? <Ionicons name={icon} size={size === 'sm' ? 16 : 19} color={k.fg} /> : null}
       <RNText style={{ color: k.fg, fontWeight: '700', fontSize: size === 'lg' ? 17 : size === 'sm' ? 14 : 16 }}>{label}</RNText>
-    </Pressable>
+    </APressable>
   )
 }
 
@@ -122,7 +132,7 @@ export function Chip({ label, tone = 'neutral', icon, small }: { label: string, 
   const c = toneColors(t, tone)
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: c.bg, borderRadius: radius.pill, paddingHorizontal: small ? 8 : 10, paddingVertical: small ? 2 : 4, alignSelf: 'flex-start' }}>
-      {icon ? <Ionicons name={icon} size={small ? 11 : 13} color={c.fg} /> : null}
+      {icon ? (tone === 'live' ? <Pulse><Ionicons name={icon} size={small ? 11 : 13} color={c.fg} /></Pulse> : <Ionicons name={icon} size={small ? 11 : 13} color={c.fg} />) : null}
       <RNText style={{ color: c.fg, fontSize: small ? 11 : 13, fontWeight: '700' }}>{label}</RNText>
     </View>
   )
@@ -132,11 +142,11 @@ export function Banner({ text, tone = 'info', icon, action }: { text: string, to
   const t = useTheme()
   const c = toneColors(t, tone)
   return (
-    <View accessibilityRole="alert" style={{ flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: c.bg, borderRadius: radius.md, padding: space.md }}>
+    <Appear from={-8} duration={260}><View accessibilityRole="alert" style={{ flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: c.bg, borderRadius: radius.md, padding: space.md }}>
       {icon ? <Ionicons name={icon} size={20} color={c.fg} /> : null}
       <RNText style={{ color: c.fg, flex: 1, fontSize: 15, lineHeight: 21, fontWeight: '600' }}>{text}</RNText>
       {action}
-    </View>
+    </View></Appear>
   )
 }
 
@@ -194,37 +204,42 @@ export function Tabs<V extends string>({ value, options, onChange, dark: onDark 
   const t = useTheme()
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, paddingHorizontal: 2 }} style={{ flexGrow: 0 }}>
-      {options.map((o) => {
-        const on = o.value === value
-        const bg = onDark ? (on ? t.volant : 'transparent') : on ? t.night : t.surface
-        const fg = onDark ? (on ? t.volantInk : '#C9D1F2') : on ? '#FFFFFF' : t.ink2
-        return (
-          <Pressable
-            key={o.value}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: on }}
-            accessibilityLabel={o.label}
-            onPress={() => onChange(o.value)}
-            style={{ flexDirection: 'row', gap: 6, alignItems: 'center', paddingHorizontal: 14, height: 40, borderRadius: radius.pill, backgroundColor: bg, borderWidth: onDark || on ? 0 : 1, borderColor: t.line }}
-          >
-            <RNText style={{ color: fg, fontWeight: '700', fontSize: 15 }}>{o.label}</RNText>
-            {o.badge ? <View style={{ backgroundColor: t.live, borderRadius: 10, minWidth: 20, paddingHorizontal: 5, height: 20, alignItems: 'center', justifyContent: 'center' }}><RNText style={{ color: '#fff', fontSize: 12, fontWeight: '800' }}>{o.badge}</RNText></View> : null}
-          </Pressable>
-        )
-      })}
+      {options.map(o => <TabItem key={o.value} label={o.label} badge={o.badge} on={o.value === value} onDark={!!onDark} onPress={() => onChange(o.value)} />)}
     </ScrollView>
+  )
+}
+
+function TabItem({ label, badge, on, onDark, onPress }: { label: string, badge?: number, on: boolean, onDark: boolean, onPress: () => void }) {
+  const t = useTheme()
+  const v = useToggle(on, 220)
+  const p = usePress(0.94)
+  const bg = v.interpolate({ inputRange: [0, 1], outputRange: onDark ? ['rgba(200,240,60,0)', t.volant] : [t.surface, t.night] })
+  const fg = v.interpolate({ inputRange: [0, 1], outputRange: onDark ? ['#C9D1F2', t.volantInk] : [t.ink2, '#FFFFFF'] })
+  return (
+    <APressable
+      accessibilityRole="tab"
+      accessibilityState={{ selected: on }}
+      accessibilityLabel={label}
+      onPress={onPress}
+      onPressIn={p.onPressIn}
+      onPressOut={p.onPressOut}
+      style={{ flexDirection: 'row', gap: 6, alignItems: 'center', paddingHorizontal: 14, height: 40, borderRadius: radius.pill, backgroundColor: bg, borderWidth: onDark ? 0 : 1, borderColor: on ? t.night : t.line, transform: [{ scale: p.scale }] }}
+    >
+      <Animated.Text style={{ color: fg, fontWeight: '700', fontSize: 15 }}>{label}</Animated.Text>
+      {badge ? <Pulse min={0.6}><View style={{ backgroundColor: t.live, borderRadius: 10, minWidth: 20, paddingHorizontal: 5, height: 20, alignItems: 'center', justifyContent: 'center' }}><RNText style={{ color: '#fff', fontSize: 12, fontWeight: '800' }}>{badge}</RNText></View></Pulse> : null}
+    </APressable>
   )
 }
 
 export function Empty({ icon = 'albums-outline', title, text, action }: { icon?: IconName, title: string, text?: string, action?: ReactNode }) {
   const t = useTheme()
   return (
-    <View style={{ alignItems: 'center', gap: 8, padding: space.xl, borderRadius: radius.lg, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.line }}>
+    <Appear style={{ alignItems: 'center', gap: 8, padding: space.xl, borderRadius: radius.lg, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.line }}>
       <Ionicons name={icon} size={34} color={t.muted} />
       <T v="h3" style={{ textAlign: 'center' }}>{title}</T>
       {text ? <T v="small" color={t.ink2} style={{ textAlign: 'center', maxWidth: 420 }}>{text}</T> : null}
       {action}
-    </View>
+    </Appear>
   )
 }
 
@@ -273,11 +288,12 @@ export function Sheet({ visible, onClose, title, children, width = 560 }: { visi
 
 export function Switcher({ value, onChange, label }: { value: boolean, onChange: (v: boolean) => void, label: string }) {
   const t = useTheme()
+  const v = useToggle(value)
   return (
     <Pressable accessibilityRole="switch" accessibilityState={{ checked: value }} accessibilityLabel={label} onPress={() => onChange(!value)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}>
-      <View style={{ width: 46, height: 28, borderRadius: 14, backgroundColor: value ? t.action : t.line, padding: 3, alignItems: value ? 'flex-end' : 'flex-start' }}>
-        <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#fff' }} />
-      </View>
+      <Animated.View style={{ width: 46, height: 28, borderRadius: 14, backgroundColor: v.interpolate({ inputRange: [0, 1], outputRange: [t.line, t.action] }), padding: 3 }}>
+        <Animated.View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#fff', transform: [{ translateX: v.interpolate({ inputRange: [0, 1], outputRange: [0, 18] }) }] }} />
+      </Animated.View>
       <T v="body" style={{ flexShrink: 1 }}>{label}</T>
     </Pressable>
   )

@@ -6,7 +6,7 @@ import { MatchCard, MatchRow } from '@/features/match'
 import { PoolTable } from '@/features/pool'
 import { useDensity, useTournament } from '@/features/tournament'
 import { DISCIPLINES } from '@/lib/format'
-import { Card, Chip, Empty, Row, Screen, Section, space, Switcher, T, Tabs, useTheme, useWide } from '@/ui'
+import { Appear, Card, Chip, Empty, Row, Screen, Section, space, stagger, Switcher, T, Tabs, useTheme, useWide } from '@/ui'
 
 export default function Draws() {
   const t = useTheme()
@@ -57,7 +57,7 @@ export default function Draws() {
       {bracket.length > 0
         ? (
             <Section title="Tableau final" right={<T v="small" color={t.muted}>{cat.bracketRulesText}</T>}>
-              <BracketView category={cat} matches={matches} ctx={ctx} />
+              <Appear key={cat.id} axis="x" from={24}><BracketView category={cat} matches={matches} ctx={ctx} /></Appear>
             </Section>
           )
         : null}
@@ -66,15 +66,15 @@ export default function Draws() {
         ? (
             <Section title="Poules" right={<T v="small" color={t.muted}>{cat.poolRulesText}</T>}>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.lg }}>
-                {cat.pools.map((p) => {
+                {cat.pools.map((p, i) => {
                   const pm = matches.filter(m => m.poolId === p.id && m.status !== 'cancelled')
                   return (
-                    <View key={p.id} style={{ flexGrow: 1, flexBasis: wide ? 460 : '100%', gap: space.sm }}>
+                    <Appear key={p.id} delay={stagger(i, 70)} style={{ flexGrow: 1, flexBasis: wide ? 460 : '100%', gap: space.sm }}>
                       <PoolTable pool={p} entries={ctx.entries} qualifiers={cat.format.type === 'pools_bracket' ? cat.format.qualifiers : 0} followed={ctx.followed} />
                       {dense
                         ? <Card pad={0} style={{ overflow: 'hidden' }}>{pm.map(m => <MatchRow key={m.id} m={m} ctx={ctx} />)}</Card>
                         : pm.map(m => <MatchCard key={m.id} m={m} ctx={ctx} />)}
-                    </View>
+                    </Appear>
                   )
                 })}
               </View>

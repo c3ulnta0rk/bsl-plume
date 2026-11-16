@@ -7,7 +7,7 @@ import { useTournament } from '@/features/tournament'
 import { patch, post } from '@/lib/api'
 import { hhmm } from '@/lib/format'
 import type { Match } from '@/lib/types'
-import { Banner, Button, Card, Chip, Empty, font, Icon, radius, Row, Screen, Section, Sheet, space, T, useTheme, useWide } from '@/ui'
+import { Appear, Banner, Button, Card, Chip, Empty, font, Icon, Pop, radius, Row, Screen, Section, Sheet, space, stagger, T, useTheme, useWide } from '@/ui'
 
 /** Salle de contrôle du tournoi : terrains, file d'attente, imprévus. */
 export default function ControlRoom() {
@@ -40,16 +40,16 @@ export default function ControlRoom() {
         <ActionError error={act.error} />
         <Section title="Préparation">
           {steps.map((s, i) => (
-            <Card key={s.title} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-              <View style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: s.done ? t.successBg : t.surface2 }}>
+            <Appear key={s.title} delay={stagger(i, 70)}><Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+              <Pop watch={s.done} scale={1.5} style={{ width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: s.done ? t.successBg : t.surface2 }}>
                 {s.done ? <Icon name="checkmark" color={t.success} /> : <Text style={{ fontFamily: font.display, fontSize: 20, color: t.ink2 }}>{i + 1}</Text>}
-              </View>
+              </Pop>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <T v="h3">{s.title}</T>
                 <T v="small" color={t.ink2}>{s.text}</T>
               </View>
               {s.action}
-            </Card>
+            </Card></Appear>
           ))}
         </Section>
       </Screen>
@@ -69,7 +69,7 @@ export default function ControlRoom() {
   const pause = (minutes: number | null) => act.run('pause', () => patch(`/organizer/tournaments/${id}`, { settings: { pausedUntil: minutes === null ? null : new Date(Date.now() + minutes * 60_000).toISOString() } }))
   const stat = (value: string, label: string) => (
     <View style={{ flexGrow: 1, flexBasis: 130, backgroundColor: t.surface, borderRadius: radius.md, borderWidth: 1, borderColor: t.line, padding: space.md }}>
-      <Text style={{ fontFamily: font.display, fontSize: 34, lineHeight: 36, color: t.ink, fontVariant: ['tabular-nums'] }}>{value}</Text>
+      <Pop watch={value} scale={1.12} style={{ alignSelf: 'flex-start' }}><Text style={{ fontFamily: font.display, fontSize: 34, lineHeight: 36, color: t.ink, fontVariant: ['tabular-nums'] }}>{value}</Text></Pop>
       <T v="label">{label}</T>
     </View>
   )
@@ -97,11 +97,11 @@ export default function ControlRoom() {
 
       <Section title="Terrains" right={<Button label="Ajouter un terrain" icon="add" size="sm" kind="secondary" loading={act.busy === 'court'} onPress={() => void act.run('court', () => post(`/organizer/tournaments/${id}/courts`, {}))} testID="add-court" />}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
-          {snap.courts.map((c) => {
+          {snap.courts.map((c, ci) => {
             const m = c.matchId ? snap.matches.find(k => k.id === c.matchId) : undefined
             const suggestion = !m && c.open ? ready.find(canPlay) : undefined
             return (
-              <View key={c.id} testID={`court-${c.name}`} style={{ flexGrow: 1, flexBasis: wide ? 360 : '100%', gap: 6 }}>
+              <Appear key={c.id} delay={stagger(ci)} testID={`court-${c.name}`} style={{ flexGrow: 1, flexBasis: wide ? 360 : '100%', gap: 6 }}>
                 <Row justify="space-between">
                   <Row>
                     <Text style={{ fontFamily: font.display, fontSize: 24, color: t.ink }}>{c.name}</Text>
@@ -111,7 +111,7 @@ export default function ControlRoom() {
                 </Row>
                 {m
                   ? (
-                      <MatchCard
+                      <Appear key={m.id} from={0} duration={300}><MatchCard
                         m={m}
                         ctx={ctx}
                         onPress={() => router.push(`${base}/match/${m.id}` as never)}
@@ -122,7 +122,7 @@ export default function ControlRoom() {
                             <Button label="Annuler l'appel" kind="ghost" size="sm" onPress={() => void act.run(`uncall-${m.id}`, () => post(`/organizer/matches/${m.id}/uncall`))} />
                           </Row>
                         )}
-                      />
+                      /></Appear>
                     )
                   : (
                       <View style={{ borderRadius: radius.lg, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.line, minHeight: 132, padding: space.md, justifyContent: 'center', gap: 8 }}>
@@ -137,7 +137,7 @@ export default function ControlRoom() {
                           : <T v="small" color={t.muted} style={{ textAlign: 'center' }}>{c.open ? 'Aucun match prêt pour ce terrain.' : 'Terrain fermé : il n\'entre plus dans le calcul des horaires.'}</T>}
                       </View>
                     )}
-              </View>
+              </Appear>
             )
           })}
         </View>

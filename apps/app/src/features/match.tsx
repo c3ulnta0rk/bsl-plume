@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router'
 import { Pressable, Text, View } from 'react-native'
 import { hhmm, inTime, resultSuffix, since } from '@/lib/format'
 import type { Category, Court, Entry, Match } from '@/lib/types'
-import { Chip, font, radius, space, T, useTheme, type Tone } from '@/ui'
+import { Chip, font, Halo, Pop, radius, space, T, useTheme, type Tone } from '@/ui'
 
 export interface MatchContext {
   entries: Map<string, Entry>
@@ -37,11 +37,11 @@ function SetBox({ value, won, current, size }: { value: number | null, won: bool
   const t = useTheme()
   const dim = size === 'xl' ? { w: 74, h: 84, f: 60 } : size === 'lg' ? { w: 50, h: 54, f: 38 } : { w: 38, h: 42, f: 28 }
   return (
-    <View style={{ width: dim.w, height: dim.h, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: current ? t.live : won ? t.volant : t.boardUp }}>
+    <Pop watch={`${value}-${won}`} style={{ width: dim.w, height: dim.h, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: current ? t.live : won ? t.volant : t.boardUp }}>
       <Text style={{ fontFamily: font.display, fontSize: dim.f, lineHeight: dim.f + 4, color: current ? '#FFFFFF' : won ? t.volantInk : value === null ? t.boardLine : t.boardText, fontVariant: ['tabular-nums'] }}>
         {value === null ? '·' : value}
       </Text>
-    </View>
+    </Pop>
   )
 }
 
@@ -108,12 +108,13 @@ export function MatchCard({ m, ctx, onPress, footer }: { m: Match, ctx: MatchCon
       onPress={go}
       style={({ pressed }) => ({ backgroundColor: t.board, borderRadius: radius.lg, padding: space.md, gap: space.sm, borderWidth: 2, borderColor: mine ? t.volant : m.status === 'playing' ? t.live : t.board, opacity: pressed ? 0.9 : 1 })}
     >
+      {m.status === 'called' ? <Halo color={t.volant} radius={radius.lg} /> : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <Text style={{ color: t.boardMuted, fontSize: 12, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', flexShrink: 1 }} numberOfLines={1}>
           {cat?.name} · {m.label}
         </Text>
         <View style={{ flex: 1 }} />
-        <Chip label={st.label} tone={st.tone} icon={st.icon} small />
+        <Pop watch={m.status} scale={1.15}><Chip label={st.label} tone={st.tone} icon={st.icon} small /></Pop>
       </View>
       <ScoreBoard m={m} ctx={ctx} size="lg" />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

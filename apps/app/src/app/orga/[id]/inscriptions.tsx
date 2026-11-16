@@ -6,7 +6,7 @@ import { useTournament } from '@/features/tournament'
 import { del, patch, post } from '@/lib/api'
 import { isDoubles, REG_STATUS } from '@/lib/format'
 import type { OrgRegistration, RegistrationStatus } from '@/lib/types'
-import { Banner, Button, Card, Chip, Choice, Empty, Field, Loading, Row, Screen, Sheet, space, T, Tabs, useTheme, type Tone } from '@/ui'
+import { Appear, Banner, Button, Card, Chip, Choice, Empty, Field, Loading, Row, Screen, Sheet, space, stagger, T, Tabs, useTheme, type Tone } from '@/ui'
 
 const TONES: Record<RegistrationStatus, Tone> = { pending_email: 'neutral', pending: 'warn', accepted: 'success', waitlist: 'info', refused: 'danger', withdrawn: 'neutral' }
 const ORDER: RegistrationStatus[] = ['pending', 'accepted', 'waitlist', 'pending_email', 'refused', 'withdrawn']
@@ -55,11 +55,11 @@ export default function Registrations() {
       {!adding && !moving && !withdrawing && !noteFor ? <ActionError error={act.error} /> : null}
       {list.length === 0
         ? <Empty icon="ticket-outline" title={current === 'pending' ? 'Aucune inscription à valider' : 'Aucune inscription dans cette liste'} text={current === 'pending' ? 'Les nouvelles demandes confirmées par mail arrivent ici.' : undefined} />
-        : list.map((r) => {
+        : list.map((r, i) => {
             const c = catOf(r.categoryId)
             const drawn = c?.status !== 'registration'
             return (
-              <Card key={r.id} testID={`reg-${names(r)}`} style={{ gap: space.sm }}>
+              <Appear key={`${current}-${r.id}`} delay={stagger(i, 35)}><Card testID={`reg-${names(r)}`} style={{ gap: space.sm }}>
                 <Row justify="space-between" wrap>
                   <View style={{ flex: 1, minWidth: 200 }}>
                     <T v="h3">{names(r)}</T>
@@ -90,7 +90,7 @@ export default function Registrations() {
                   {r.status === 'withdrawn' ? <Button label="Réintégrer" size="sm" kind="secondary" onPress={() => void act.run(`re-${r.id}`, () => post(`/organizer/registrations/${r.id}/reinstate`))} /> : null}
                   {(r.status === 'pending_email' || r.status === 'refused') ? <Button label="Supprimer" size="sm" kind="ghost" onPress={() => void act.run(`del-${r.id}`, () => del(`/organizer/registrations/${r.id}`))} /> : null}
                 </Row>
-              </Card>
+              </Card></Appear>
             )
           })}
 

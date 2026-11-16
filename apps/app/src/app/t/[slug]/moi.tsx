@@ -8,7 +8,7 @@ import { useNotifications } from '@/lib/data'
 import { hhmm, inTime } from '@/lib/format'
 import { disablePush, enablePush, pushState, type PushState } from '@/lib/push'
 import type { Follow, Match, Snapshot } from '@/lib/types'
-import { Banner, Button, Card, Chip, Empty, font, radius, Row, Screen, Section, space, T, useTheme, useWide } from '@/ui'
+import { Appear, Banner, Button, Card, Chip, Empty, font, Halo, Pop, radius, Row, Screen, Section, space, stagger, T, useTheme, useWide } from '@/ui'
 
 /** Le prochain rendez-vous d'un joueur, en très gros : terrain, heure, temps libre. */
 function NextUp({ f, snap, ctx, matches }: { f: Follow, snap: Snapshot, ctx: MatchContext, matches: Match[] }) {
@@ -27,8 +27,14 @@ function NextUp({ f, snap, ctx, matches }: { f: Follow, snap: Snapshot, ctx: Mat
       <Button label="Historique" kind="secondary" size="sm" onPress={() => router.push(`/joueur/${f.playerId}?t=${snap.tournament.slug}` as never)} />
     </Row>
   )
-  const box = (children: React.ReactNode, border: string) => (
-    <View testID={`next-${f.playerId}`} style={{ backgroundColor: t.board, borderRadius: radius.lg, padding: space.lg, gap: space.md, borderWidth: 2, borderColor: border }}>{head}{children}</View>
+  const box = (children: React.ReactNode, border: string, state = 'idle') => (
+    <Pop watch={state} scale={1.04}>
+      <View testID={`next-${f.playerId}`} style={{ backgroundColor: t.board, borderRadius: radius.lg, padding: space.lg, gap: space.md, borderWidth: 2, borderColor: border }}>
+        {state === 'called' ? <Halo color={t.volant} radius={radius.lg} /> : null}
+        {head}
+        <Appear key={state} from={10}><View style={{ gap: space.md }}>{children}</View></Appear>
+      </View>
+    </Pop>
   )
   if (!m) {
     const any = matches.length > 0
@@ -49,7 +55,7 @@ function NextUp({ f, snap, ctx, matches }: { f: Follow, snap: Snapshot, ctx: Mat
           <Text style={{ fontFamily: font.display, fontSize: 64, lineHeight: 66, color: m.status === 'called' ? t.volantInk : '#fff' }}>{court ?? 'Terrain'}</Text>
         </View>
         <Text style={{ color: '#C9D1F2', fontSize: 17 }}>Contre <Text style={{ color: '#fff', fontWeight: '800' }}>{opp.name}</Text> · {cat?.name}</Text>
-      </>, m.status === 'called' ? t.volant : t.live)
+      </>, m.status === 'called' ? t.volant : t.live, m.status)
   }
   const min = m.estimatedStart ? Math.round((m.estimatedStart - ctx.now) / 60_000) : null
   const known = !!(m.entry1Id && m.entry2Id)
@@ -58,7 +64,7 @@ function NextUp({ f, snap, ctx, matches }: { f: Follow, snap: Snapshot, ctx: Mat
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: space.lg, flexWrap: 'wrap' }}>
         <View>
           <Text style={{ color: t.boardMuted, fontSize: 13, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase' }}>Prochain match, heure estimée</Text>
-          <Text style={{ fontFamily: font.display, fontSize: 72, lineHeight: 74, color: '#FFFFFF', fontVariant: ['tabular-nums'] }}>{m.estimatedStart ? hhmm(m.estimatedStart) : '--:--'}</Text>
+          <Pop watch={m.estimatedStart ? hhmm(m.estimatedStart) : ''} scale={1.08} style={{ alignSelf: 'flex-start' }}><Text style={{ fontFamily: font.display, fontSize: 72, lineHeight: 74, color: '#FFFFFF', fontVariant: ['tabular-nums'] }}>{m.estimatedStart ? hhmm(m.estimatedStart) : '--:--'}</Text></Pop>
         </View>
         {m.estimatedStart ? <View style={{ paddingBottom: 12 }}><Chip label={inTime(m.estimatedStart, ctx.now)} tone={min !== null && min <= 15 ? 'accent' : 'info'} icon="time-outline" /></View> : null}
       </View>
@@ -75,7 +81,7 @@ function NextUp({ f, snap, ctx, matches }: { f: Follow, snap: Snapshot, ctx: Mat
               : 'L\'heure s\'ajuste en direct selon l\'avancement des terrains.'}
         {!known ? ' L\'adversaire dépend des matchs en cours.' : ''}
       </Text>
-    </>, t.board)
+    </>, t.board, 'pending')
 }
 
 export default function Mine() {
@@ -143,7 +149,7 @@ export default function Mine() {
                 return (
                   <Section key={f.playerId} title={`Matchs de ${f.name}`} right={<Button label="Ne plus suivre" kind="ghost" size="sm" onPress={() => follows.unfollow.mutate(f.playerId)} />}>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
-                      {ms.map(m => <View key={m.id} style={{ flexGrow: 1, flexBasis: wide ? 380 : '100%' }}><MatchCard m={m} ctx={ctx} /></View>)}
+                      {ms.map((m, i) => <Appear key={m.id} delay={stagger(i)} style={{ flexGrow: 1, flexBasis: wide ? 380 : '100%' }}><MatchCard m={m} ctx={ctx} /></Appear>)}
                     </View>
                   </Section>
                 )
@@ -154,7 +160,7 @@ export default function Mine() {
 
       {adding
         ? (
-            <Card style={{ gap: space.lg }}>
+            <Appear key={String(mode)} axis="x" from={mode === null ? -20 : 20}><Card style={{ gap: space.lg }}>
               {mode === null
                 ? (
                     <>
@@ -187,7 +193,7 @@ export default function Mine() {
                       {mode === 'fan' && here.length > 0 ? <Button label="Terminé" icon="checkmark" full size="lg" onPress={() => setMode(null)} testID="follow-done" /> : null}
                     </>
                   )}
-            </Card>
+            </Card></Appear>
           )
         : <Button label="Suivre un autre joueur" icon="add" kind="secondary" onPress={() => setMode('fan')} testID="follow-more" />}
       {here.length === 0 && follows.list.length > 0 && mode === null ? <Empty icon="star-outline" title="Aucun de vos joueurs suivis ne participe à ce tournoi" /> : null}

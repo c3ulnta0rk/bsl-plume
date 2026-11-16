@@ -7,7 +7,7 @@ import { useTournament } from '@/features/tournament'
 import { del, patch, post } from '@/lib/api'
 import { DISCIPLINES } from '@/lib/format'
 import type { Category, CategoryFormat, Discipline } from '@/lib/types'
-import { Banner, Button, Card, Chip, Choice, Empty, Field, Row, Screen, Section, Sheet, space, Switcher, T, useTheme } from '@/ui'
+import { Appear, Banner, Button, Card, Chip, Choice, Empty, Field, Row, Screen, Section, Sheet, space, stagger, Switcher, T, useTheme } from '@/ui'
 
 interface Draft { id: string | null, name: string, discipline: Discipline, level: string, maxEntries: string, format: CategoryFormat, poolRules: ScoringRules, bracketRules: ScoringRules, status: Category['status'] }
 const blank = (): Draft => ({ id: null, name: '', discipline: 'SH', level: '', maxEntries: '16', format: { type: 'pools_bracket', poolSize: 4, qualifiers: 2, thirdPlace: false }, poolRules: DEFAULT_RULES, bracketRules: DEFAULT_RULES, status: 'registration' })
@@ -37,10 +37,10 @@ export default function Categories() {
       <Section title="Tableaux" right={<Button label="Nouveau tableau" icon="add" onPress={() => { act.clearError(); setDraft(blank()) }} testID="new-category" />}>
         {snap.categories.length === 0
           ? <Empty icon="grid-outline" title="Aucun tableau" text="Un tableau = une discipline et un niveau : par exemple Simple hommes série B, ou Double mixte." action={<Button label="Créer un tableau" icon="add" onPress={() => setDraft(blank())} />} />
-          : snap.categories.map((c) => {
+          : snap.categories.map((c, i) => {
               const played = snap.matches.some(m => m.categoryId === c.id && (m.status !== 'pending' || m.sets.length > 0))
               return (
-                <Card key={c.id} testID={`category-${c.name}`} style={{ gap: space.sm }}>
+                <Appear key={c.id} delay={stagger(i, 60)}><Card testID={`category-${c.name}`} style={{ gap: space.sm }}>
                   <Row justify="space-between" wrap>
                     <View style={{ flex: 1, minWidth: 180 }}>
                       <T v="h2">{c.name}</T>
@@ -70,7 +70,7 @@ export default function Categories() {
                     {c.status === 'registration' ? <Button label="Supprimer" size="sm" kind="ghost" onPress={() => void act.run(`del-${c.id}`, () => del(`/organizer/categories/${c.id}`))} /> : null}
                   </Row>
                   {c.status === 'registration' && c.counts.accepted < 2 ? <T v="small" color={t.muted}>Il faut au moins deux inscriptions validées pour tirer ce tableau.</T> : null}
-                </Card>
+                </Card></Appear>
               )
             })}
       </Section>

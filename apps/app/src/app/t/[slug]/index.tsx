@@ -3,7 +3,7 @@ import { Text, View } from 'react-native'
 import { MatchCard } from '@/features/match'
 import { useTournament } from '@/features/tournament'
 import { dateFr, DISCIPLINES } from '@/lib/format'
-import { Banner, Button, Card, Chip, Empty, font, radius, Row, Screen, Section, space, T, useTheme, useWide } from '@/ui'
+import { Appear, Bar, Banner, Button, Card, Chip, Empty, font, radius, Row, Screen, Section, space, stagger, T, useTheme, useWide } from '@/ui'
 
 export default function Overview() {
   const t = useTheme()
@@ -37,8 +37,8 @@ export default function Overview() {
             <>
               <Section title="Sur les terrains" right={total ? <Chip label={`${done} / ${total} matchs joués`} tone="info" /> : undefined}>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
-                  {onCourt.map(({ c, m }) => (
-                    <View key={c.id} style={{ flexGrow: 1, flexBasis: wide ? 340 : '100%', gap: 6 }}>
+                  {onCourt.map(({ c, m }, i) => (
+                    <Appear key={c.id} delay={stagger(i)} style={{ flexGrow: 1, flexBasis: wide ? 340 : '100%', gap: 6 }}>
                       <Row>
                         <Text style={{ fontFamily: font.display, fontSize: 22, color: t.ink }}>{c.name}</Text>
                         {!c.open ? <Chip label="Fermé" tone="warn" small /> : null}
@@ -46,7 +46,7 @@ export default function Overview() {
                       {m
                         ? <MatchCard m={m} ctx={ctx} />
                         : <View style={{ borderRadius: radius.lg, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.line, minHeight: 120, alignItems: 'center', justifyContent: 'center' }}><T v="small" color={t.muted}>{c.open ? 'Terrain libre' : 'Terrain fermé'}</T></View>}
-                    </View>
+                    </Appear>
                   ))}
                 </View>
               </Section>
@@ -54,7 +54,7 @@ export default function Overview() {
                 ? (
                     <Section title="À suivre" right={<Button label="Tous les matchs" kind="ghost" size="sm" icon="arrow-forward" onPress={() => router.replace(`${base}/matchs` as never)} />}>
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
-                        {next.map(m => <View key={m.id} style={{ flexGrow: 1, flexBasis: wide ? 340 : '100%' }}><MatchCard m={m} ctx={ctx} /></View>)}
+                        {next.map((m, i) => <Appear key={m.id} delay={stagger(i + 2)} style={{ flexGrow: 1, flexBasis: wide ? 340 : '100%' }}><MatchCard m={m} ctx={ctx} /></Appear>)}
                       </View>
                     </Section>
                   )
@@ -78,9 +78,7 @@ export default function Overview() {
                         {c.status === 'finished' ? <Chip label="Terminé" small /> : c.status === 'drawn' ? <Chip label="Tirage fait" tone="info" small /> : full ? <Chip label="Complet" tone="warn" small /> : <Chip label={`${c.maxEntries - c.counts.accepted} places`} tone="success" small />}
                       </Row>
                       <T v="small" color={t.ink2}>{DISCIPLINES[c.discipline]}{c.level ? ` · ${c.level}` : ''}</T>
-                      <View style={{ height: 8, borderRadius: 4, backgroundColor: t.surface2, overflow: 'hidden' }}>
-                        <View style={{ width: `${ratio * 100}%`, height: 8, backgroundColor: full ? t.warn : t.action }} />
-                      </View>
+                      <Bar ratio={ratio} color={full ? t.warn : t.action} track={t.surface2} />
                       <T v="small" color={t.ink2}><T v="h3">{c.counts.accepted}</T> / {c.maxEntries} {c.discipline.startsWith('D') ? 'paires' : 'joueurs'}{c.counts.waitlist ? ` · ${c.counts.waitlist} en attente` : ''}</T>
                     </Card>
                   )

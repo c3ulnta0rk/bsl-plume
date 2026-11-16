@@ -4,7 +4,7 @@ import { View } from 'react-native'
 import { MatchCard, MatchRow } from '@/features/match'
 import { useDensity, useTournament } from '@/features/tournament'
 import type { Match } from '@/lib/types'
-import { Card, Empty, Row, Screen, space, Switcher, Tabs, useWide } from '@/ui'
+import { Appear, Card, Empty, Row, Screen, space, stagger, Switcher, Tabs, useWide } from '@/ui'
 
 type Filter = 'live' | 'next' | 'done'
 
@@ -44,10 +44,10 @@ export default function Matches() {
       {list.length === 0
         ? <Empty icon="tennisball-outline" title={current === 'live' ? 'Aucun match sur les terrains' : current === 'next' ? 'Aucun match à venir' : 'Aucun match terminé'} text={snap.matches.length === 0 ? 'Les matchs apparaîtront après le tirage au sort.' : undefined} />
         : dense
-          ? <Card pad={0} style={{ overflow: 'hidden' }}>{list.map(m => <MatchRow key={m.id} m={m} ctx={ctx} />)}</Card>
+          ? <Appear key={`${current}-${cat}-dense`}><Card pad={0} style={{ overflow: 'hidden' }}>{list.map(m => <MatchRow key={m.id} m={m} ctx={ctx} />)}</Card></Appear>
           : (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
-                {list.map(m => <View key={m.id} style={{ flexGrow: 1, flexBasis: wide ? 340 : '100%', maxWidth: wide ? 540 : undefined }}><MatchCard m={m} ctx={ctx} /></View>)}
+                {list.map((m, i) => <Appear key={`${current}-${m.id}`} delay={stagger(i)} style={{ flexGrow: 1, flexBasis: wide ? 340 : '100%', maxWidth: wide ? 540 : undefined }}><MatchCard m={m} ctx={ctx} /></Appear>)}
               </View>
             )}
     </Screen>

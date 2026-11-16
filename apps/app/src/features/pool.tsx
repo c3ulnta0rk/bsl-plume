@@ -1,6 +1,6 @@
 import { ScrollView, Text, View } from 'react-native'
 import type { Category, Entry } from '@/lib/types'
-import { Chip, font, radius, Row, space, T, useTheme } from '@/ui'
+import { Chip, font, Pop, radius, Row, space, T, useTheme } from '@/ui'
 
 type Pool = Category['pools'][number]
 
@@ -30,9 +30,9 @@ export function PoolTable({ pool, entries, qualifiers, followed }: { pool: Pool,
             return (
               <View key={r.id} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md, minHeight: 52, borderBottomWidth: i === pool.standings.length - 1 ? 0 : 1, borderColor: t.line, backgroundColor: mine ? t.actionSoft : 'transparent' }}>
                 <View style={{ width: 30 }}>
-                  <View style={{ width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: q && pool.complete ? t.volant : q ? t.surface2 : 'transparent' }}>
+                  <Pop watch={`${r.rank}-${pool.complete}`} scale={1.4} style={{ width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: q && pool.complete ? t.volant : q ? t.surface2 : 'transparent' }}>
                     <Text style={{ fontFamily: font.display, fontSize: 17, color: q && pool.complete ? t.volantInk : t.ink }}>{r.withdrawn ? '–' : r.rank}</Text>
-                  </View>
+                  </Pop>
                 </View>
                 <View style={{ flex: 1, minWidth: 0, paddingVertical: 6 }}>
                   <Text numberOfLines={2} style={{ fontSize: 15, fontWeight: '700', color: r.withdrawn ? t.muted : t.ink, textDecorationLine: r.withdrawn ? 'line-through' : 'none' }}>{e?.name ?? '?'}</Text>

@@ -6,7 +6,7 @@ import { useFollows } from '@/lib/data'
 import { dateFr } from '@/lib/format'
 import { useSession } from '@/lib/session'
 import type { PlayerHistory } from '@/lib/types'
-import { Banner, Button, Card, Chip, Empty, font, Loading, radius, Row, Screen, Section, space, T, useTheme } from '@/ui'
+import { Appear, Banner, Button, Card, Chip, CountUp, Empty, font, Loading, radius, Row, Screen, Section, space, stagger, T, useTheme } from '@/ui'
 
 /** Fiche d'un joueur : son parcours tournoi par tournoi. */
 export default function Player() {
@@ -21,9 +21,9 @@ export default function Player() {
   const { player, stats, tournaments } = q.data
   const on = follows.ids.has(player.id)
   const rate = stats.played ? Math.round((stats.won / stats.played) * 100) : null
-  const stat = (value: string, label: string) => (
+  const stat = (value: number | null, label: string, suffix = '') => (
     <View style={{ flexGrow: 1, flexBasis: 90, backgroundColor: t.boardUp, borderRadius: radius.md, padding: space.md }}>
-      <Text style={{ fontFamily: font.display, fontSize: 38, lineHeight: 40, color: '#FFFFFF' }}>{value}</Text>
+      {value === null ? <Text style={{ fontFamily: font.display, fontSize: 38, lineHeight: 40, color: '#FFFFFF' }}>–</Text> : <CountUp value={value} suffix={suffix} style={{ fontFamily: font.display, fontSize: 38, lineHeight: 40, color: '#FFFFFF' }} />}
       <Text style={{ color: t.boardMuted, fontSize: 12, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase' }}>{label}</Text>
     </View>
   )
@@ -39,16 +39,16 @@ export default function Player() {
           <Button label={on ? 'Suivi' : 'Suivre'} icon={on ? 'star' : 'star-outline'} kind={on ? 'accent' : 'secondary'} onPress={() => (on ? follows.unfollow.mutate(player.id) : follows.follow.mutate({ playerId: player.id }))} testID="follow-player" />
         </Row>
         <Row gap={space.sm} wrap>
-          {stat(String(tournaments.length), 'Tournois')}
-          {stat(String(stats.played), 'Matchs')}
-          {stat(String(stats.won), 'Victoires')}
-          {stat(rate === null ? '–' : `${rate} %`, 'Réussite')}
+          {stat(tournaments.length, 'Tournois')}
+          {stat(stats.played, 'Matchs')}
+          {stat(stats.won, 'Victoires')}
+          {stat(rate, 'Réussite', ' %')}
         </Row>
       </View>
       {tournaments.length === 0
         ? <Empty icon="time-outline" title="Pas encore d'historique" text="Les résultats de ce joueur apparaîtront ici après ses premiers matchs." />
-        : tournaments.map(tr => (
-            <Section key={tr.slug} title={tr.name} right={<Button label="Voir le tournoi" kind="ghost" size="sm" onPress={() => router.push(`/t/${tr.slug}` as never)} />}>
+        : tournaments.map((tr, i) => (
+            <Appear key={tr.slug} delay={stagger(i + 1, 90)} style={{ gap: 12 }}><Section title={tr.name} right={<Button label="Voir le tournoi" kind="ghost" size="sm" onPress={() => router.push(`/t/${tr.slug}` as never)} />}>
               <T v="small" color={t.muted} style={{ marginTop: -8 }}>{dateFr(tr.date)}{tr.location ? ` · ${tr.location}` : ''}</T>
               {tr.categories.map(c => (
                 <Card key={c.id} pad={0} style={{ overflow: 'hidden' }}>
@@ -77,7 +77,7 @@ export default function Player() {
                       ))}
                 </Card>
               ))}
-            </Section>
+            </Section></Appear>
           ))}
     </Screen>
   )

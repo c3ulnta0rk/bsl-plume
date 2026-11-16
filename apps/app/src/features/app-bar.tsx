@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Image, Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSession } from '@/lib/session'
-import { font, radius, space, useTheme, useWide } from '@/ui'
+import { Appear, font, Pop, radius, space, useTheme, useWide } from '@/ui'
 
 /** Barre du haut, identique sur le web et dans l'application. */
 export function AppBar() {
@@ -54,19 +54,19 @@ export function AppBar() {
         : null}
       {alert
         ? (
-            <Pressable
+            <Appear key={alert.id} from={-40} duration={420}><Pressable
               testID="live-alert"
               accessibilityRole="alert"
               onPress={() => { const u = alert.url; dismissAlert(); if (u) router.push(u as never) }}
               style={{ backgroundColor: t.volant, paddingVertical: 12, paddingHorizontal: space.lg, flexDirection: 'row', alignItems: 'center', gap: 12 }}
             >
-              <Ionicons name="notifications" size={24} color={t.volantInk} />
+              <Pop watch={alert.id} scale={1.5}><Ionicons name="notifications" size={24} color={t.volantInk} /></Pop>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: font.display, fontSize: 22, color: t.volantInk }}>{alert.title}</Text>
                 <Text style={{ color: t.volantInk, fontSize: 15, fontWeight: '600' }}>{alert.body}</Text>
               </View>
               <Pressable accessibilityLabel="Fermer l'alerte" onPress={dismissAlert} hitSlop={12}><Ionicons name="close" size={22} color={t.volantInk} /></Pressable>
-            </Pressable>
+            </Pressable></Appear>
           )
         : null}
     </View>
