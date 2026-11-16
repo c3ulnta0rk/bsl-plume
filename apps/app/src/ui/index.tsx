@@ -220,6 +220,7 @@ function TabItem({ label, badge, on, onDark, onPress }: { label: string, badge?:
   const bg = v.interpolate({ inputRange: [0, 1], outputRange: onDark ? ['rgba(200,240,60,0)', t.volant] : [t.surface, t.night] })
   const fg = v.interpolate({ inputRange: [0, 1], outputRange: onDark ? ['#C9D1F2', t.volantInk] : [t.ink2, '#FFFFFF'] })
   return (
+    // Le rebond (pilote natif) et les couleurs (pilote JS) ne peuvent pas partager la même vue sur Android et iOS.
     <APressable
       accessibilityRole="tab"
       accessibilityState={{ selected: on }}
@@ -227,10 +228,12 @@ function TabItem({ label, badge, on, onDark, onPress }: { label: string, badge?:
       onPress={onPress}
       onPressIn={p.onPressIn}
       onPressOut={p.onPressOut}
-      style={{ flexDirection: 'row', gap: 6, alignItems: 'center', paddingHorizontal: 14, height: 40, borderRadius: radius.pill, backgroundColor: bg, borderWidth: onDark ? 0 : 1, borderColor: on ? t.night : t.line, transform: [{ scale: p.scale }] }}
+      style={{ transform: [{ scale: p.scale }] }}
     >
-      <Animated.Text style={{ color: fg, fontWeight: '700', fontSize: 15 }}>{label}</Animated.Text>
-      {badge ? <Pulse min={0.6}><View style={{ backgroundColor: t.live, borderRadius: 10, minWidth: 20, paddingHorizontal: 5, height: 20, alignItems: 'center', justifyContent: 'center' }}><RNText style={{ color: '#fff', fontSize: 12, fontWeight: '800' }}>{badge}</RNText></View></Pulse> : null}
+      <Animated.View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', paddingHorizontal: 14, height: 40, borderRadius: radius.pill, backgroundColor: bg, borderWidth: onDark ? 0 : 1, borderColor: on ? t.night : t.line }}>
+        <Animated.Text style={{ color: fg, fontWeight: '700', fontSize: 15 }}>{label}</Animated.Text>
+        {badge ? <Pulse min={0.6}><View style={{ backgroundColor: t.live, borderRadius: 10, minWidth: 20, paddingHorizontal: 5, height: 20, alignItems: 'center', justifyContent: 'center' }}><RNText style={{ color: '#fff', fontSize: 12, fontWeight: '800' }}>{badge}</RNText></View></Pulse> : null}
+      </Animated.View>
     </APressable>
   )
 }

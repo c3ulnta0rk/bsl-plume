@@ -35,3 +35,9 @@ Pour le compléter avec les résultats fédéraux : la FFBaD ne publie pas d'int
 ## Formats de score officiels
 
 Les membres de la BWF ont voté le 25 avril 2026 le passage au format 3×15 (deux sets gagnants de 15, plafond à 21) à compter du 4 janvier 2027. Le 3×21 reste autorisé pour les compétitions nationales et locales. Les deux sont proposés en préréglages ; la date d'application en France dépend de la FFBaD.
+
+## Android (Waydroid, 16 novembre 2026)
+
+Testé dans Waydroid (Android 13, x86_64) avec Expo Go : accueil, tournoi en direct, tableaux, suivi d'un joueur, connexion, pilotage des terrains, appel d'un match, score point par point. Le test a révélé un plantage propre à Android (une animation de couleur et une animation de rebond sur la même vue), corrigé dans `TabItem`. Les notifications push distantes ne marchent pas dans Expo Go ; elles demandent un « development build ».
+
+Lancer : `EXPO_PUBLIC_API_URL=http://<ip du PC>:4000 npx expo start --android` depuis `apps/app`, le serveur étant lancé par ailleurs. Dans Waydroid l'adresse du PC est `192.168.240.1`.
