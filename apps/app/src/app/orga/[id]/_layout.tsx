@@ -34,7 +34,7 @@ export default function OrgLayout() {
   ]
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ backgroundColor: t.night, borderTopWidth: 1, borderColor: t.boardLine }}>
+      <View testID="noprint" style={{ backgroundColor: t.night, borderTopWidth: 1, borderColor: t.boardLine }}>
         <View style={{ width: '100%', maxWidth: 1240, alignSelf: 'center', paddingHorizontal: space.lg, paddingVertical: space.md, gap: space.md }}>
           <Row justify="space-between" wrap>
             <View style={{ flex: 1, minWidth: 220, gap: 4 }}>

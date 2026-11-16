@@ -1,11 +1,11 @@
 import { useLocalSearchParams } from 'expo-router'
+import { useEffect, useState } from 'react'
 import { Platform, Text, View } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { useTournament } from '@/features/tournament'
 import { API_BASE } from '@/lib/api'
 import { dateFr } from '@/lib/format'
 import { Button, Card, Field, font, radius, Row, Screen, space, T, useTheme } from '@/ui'
-import { useState } from 'react'
 
 /** Affiche à imprimer et coller dans la salle : le QR code mène droit au suivi du tournoi. */
 export default function Poster() {
@@ -14,10 +14,19 @@ export default function Poster() {
   const { snap } = useTournament(id)
   const origin = Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.origin : API_BASE
   const [base, setBase] = useState(origin)
+  useEffect(() => {
+    // à l'impression, on ne garde que l'affiche
+    if (Platform.OS !== 'web') return
+    const style = document.createElement('style')
+    style.textContent = '@media print { [data-testid="noprint"] { display: none !important } body { background: #fff !important } }'
+    document.head.appendChild(style)
+    return () => { style.remove() }
+  }, [])
   if (!snap) return null
   const url = `${base.replace(/\/$/, '')}/t/${snap.tournament.slug}/moi`
   return (
     <Screen maxWidth={760}>
+      <View testID="noprint">
       <Card style={{ gap: space.md }}>
         <T color={t.ink2}>Imprimez cette affiche et collez-la à l'entrée et près de la table de marque. En scannant le code, chacun choisit « je joue » ou « je suis un joueur » et reçoit ses horaires.</T>
         <Field label="Adresse du site" value={base} onChangeText={setBase} autoCapitalize="none" hint="En mode salle sans Internet, mettez ici l'adresse du serveur sur le réseau Wi-Fi local, par exemple http://192.168.1.10:4000." />
@@ -25,6 +34,7 @@ export default function Poster() {
           {Platform.OS === 'web' ? <Button label="Imprimer" icon="print-outline" onPress={() => window.print()} /> : null}
         </Row>
       </Card>
+      </View>
       <View testID="poster" style={{ backgroundColor: '#FFFFFF', borderRadius: radius.lg, padding: space.xxl, alignItems: 'center', gap: space.lg, borderWidth: 1, borderColor: t.line }}>
         <Text style={{ fontFamily: font.display, fontSize: 22, letterSpacing: 3, color: '#0B1437' }}>PLUME</Text>
         <Text style={{ fontFamily: font.display, fontSize: 46, lineHeight: 48, color: '#0B1437', textAlign: 'center' }}>{snap.tournament.name}</Text>

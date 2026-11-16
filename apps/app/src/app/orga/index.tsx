@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
+import { Platform } from 'react-native'
 import { ActionError, useAction } from '@/features/orga'
 import { get, post } from '@/lib/api'
 import { dateFr, TOURNAMENT_STATUS } from '@/lib/format'
@@ -43,9 +44,32 @@ export default function Organizer() {
     })
     if (ok) { setOpen(false); router.push(`/orga/${id}/tableaux` as never) }
   }
+  const importJson = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'application/json,.json'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      const text = await file.text()
+      let newId = ''
+      const ok = await act.run('import', async () => { newId = (await post<{ id: string }>('/organizer/import', JSON.parse(text))).id })
+      if (ok) router.push(`/orga/${newId}` as never)
+    }
+    input.click()
+  }
   return (
     <Screen maxWidth={860}>
-      <Section title="Mes tournois" right={<Button label="Nouveau tournoi" icon="add" onPress={() => setOpen(true)} testID="new-tournament" />}>
+      {!open ? <ActionError error={act.error} /> : null}
+      <Section
+        title="Mes tournois"
+        right={(
+          <Row wrap>
+            {Platform.OS === 'web' ? <Button label="Importer un export" icon="cloud-upload-outline" kind="secondary" loading={act.busy === 'import'} onPress={importJson} testID="import-tournament" /> : null}
+            <Button label="Nouveau tournoi" icon="add" onPress={() => { act.clearError(); setOpen(true) }} testID="new-tournament" />
+          </Row>
+        )}
+      >
         {q.isLoading
           ? <Loading />
           : (q.data ?? []).length === 0

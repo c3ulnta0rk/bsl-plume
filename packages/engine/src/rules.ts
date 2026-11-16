@@ -33,22 +33,22 @@ export const RULES_PRESETS: RulesPreset[] = [
   {
     id: 'std-3x21',
     label: '2 sets gagnants de 21',
-    description: 'Format officiel en vigueur (BWF et FFBaD) : 2 sets gagnants de 21 points, 2 points d\'écart, plafond à 30.',
+    description: 'Format historique : 2 sets gagnants de 21 points, 2 points d\'écart, plafond à 30. Officiel BWF jusqu\'au 3 janvier 2027, il reste autorisé ensuite pour les compétitions nationales et locales.',
     federation: 'BWF',
     rules: { bestOf: 3, pointsPerSet: 21, winByTwo: true, cap: 30 }
   },
   {
     id: 'alt-3x15',
     label: '2 sets gagnants de 15',
-    description: 'Format 3×15 : 2 sets gagnants de 15 points, 2 points d\'écart, plafond à 21. Matchs plus courts.',
+    description: 'Nouveau format officiel BWF à compter du 4 janvier 2027 (voté le 25 avril 2026) : 2 sets gagnants de 15 points, 2 points d\'écart, plafond à 21. Vérifiez la date d\'application retenue par votre fédération nationale.',
     federation: 'BWF',
     rules: { bestOf: 3, pointsPerSet: 15, winByTwo: true, cap: 21 }
   },
   {
     id: 'alt-5x11',
     label: '3 sets gagnants de 11',
-    description: 'Format 5×11 : 3 sets gagnants de 11 points, 2 points d\'écart, plafond à 15.',
-    federation: 'BWF',
+    description: 'Format 5×11 testé par la BWF : 3 sets gagnants de 11 points, 2 points d\'écart, plafond à 15.',
+    federation: 'Libre',
     rules: { bestOf: 5, pointsPerSet: 11, winByTwo: true, cap: 15 }
   },
   {

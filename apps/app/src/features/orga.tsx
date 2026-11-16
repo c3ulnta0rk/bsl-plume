@@ -51,7 +51,7 @@ export function RulesEditor({ label, value, onChange }: { label: string, value: 
           setCustom(false)
           onChange(RULES_PRESETS.find(p => p.id === id)!.rules)
         }}
-        options={[...RULES_PRESETS.map(p => ({ value: p.id, label: p.label, hint: p.federation === 'Libre' ? 'Format court' : 'Officiel' })), { value: 'custom', label: 'Réglage libre' }]}
+        options={[...RULES_PRESETS.map(p => ({ value: p.id, label: p.label, hint: p.federation === 'Libre' ? 'Format libre' : 'Officiel' })), { value: 'custom', label: 'Réglage libre' }]}
       />
       {custom
         ? (

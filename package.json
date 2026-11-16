@@ -2,7 +2,11 @@
   "name": "bsl-plume",
   "private": true,
   "version": "2.0.0",
-  "workspaces": ["packages/*", "apps/*", "e2e"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "e2e"
+  ],
   "scripts": {
     "dev": "npm run dev --workspace @plume/server",
     "dev:app": "npm run web --workspace @plume/app",
@@ -10,7 +14,11 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build:web": "npm run build:web --workspace @plume/app",
     "start": "npm run start --workspace @plume/server",
-    "seed": "npm run seed --workspace @plume/server"
+    "seed": "npm run seed --workspace @plume/server",
+    "salle": "npm run build:web && npm start",
+    "test:e2e": "npm test --workspace @plume/e2e"
   },
-  "engines": { "node": ">=22" }
+  "engines": {
+    "node": ">=22"
+  }
 }

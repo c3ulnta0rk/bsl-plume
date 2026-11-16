@@ -1,0 +1,26 @@
+# Hébergement : docker compose up -d (fonctionne aussi avec podman compose)
+services:
+  plume:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: plume
+      POSTGRES_PASSWORD: change-moi
+      POSTGRES_DB: plume
+    volumes:
+      - plume-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plume"]
+      interval: 5s
+      retries: 10
+volumes:
+  plume-db:

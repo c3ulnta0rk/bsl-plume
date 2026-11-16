@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'
 import { Link, usePathname, useRouter } from 'expo-router'
 import { useEffect } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Image, Pressable, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSession } from '@/lib/session'
 import { font, radius, space, useTheme, useWide } from '@/ui'
@@ -33,13 +33,11 @@ export function AppBar() {
     </Pressable>
   )
   return (
-    <View style={{ backgroundColor: t.night, paddingTop: insets.top, zIndex: 10 }}>
+    <View testID="noprint" style={{ backgroundColor: t.night, paddingTop: insets.top, zIndex: 10 }}>
       <View style={{ height: 56, flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.lg, gap: 6, width: '100%', maxWidth: 1120, alignSelf: 'center' }}>
         <Link href="/" accessibilityLabel="Plume, accueil" style={{ marginRight: 'auto' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: t.volant, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-8deg' }] }}>
-              <Ionicons name="leaf" size={18} color={t.volantInk} />
-            </View>
+            <Image source={require('../../assets/images/splash-icon.png')} style={{ width: 32, height: 32 }} accessibilityIgnoresInvertColors />
             <Text style={{ fontFamily: font.display, fontSize: 26, color: '#FFFFFF', letterSpacing: 1.5 }}>PLUME</Text>
           </View>
         </Link>
