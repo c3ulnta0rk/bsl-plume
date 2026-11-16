@@ -2,7 +2,7 @@
   "name": "bsl-plume",
   "private": true,
   "version": "2.0.0",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": ["packages/*", "apps/*", "e2e"],
   "scripts": {
     "dev": "npm run dev --workspace @plume/server",
     "dev:app": "npm run web --workspace @plume/app",
